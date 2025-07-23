@@ -24,7 +24,7 @@ services:
   app_proxy:
     environment:
       - APP_HOST=me-n8n_server
-      - APP_PORT=5678
+      - APP_PORT=5679
     restart: on-failure
 
   # -- THE N8N BACKEND --
@@ -34,15 +34,16 @@ services:
     depends_on:
       - tailscale
     volumes:
-      - ${APP_DATA_DIR}/data:/home/node/.n8n
+      - ${APP_DATA_DIR}/data:/home/node/.n8n1
     environment:
       - PUID=1000
       - PGID=1000
       - N8N_HOST=${DEVICE_DOMAIN_NAME}
       - N8N_SECURE_COOKIE=false
-      - N8N_DIAGNOSTICS_ENABLED=false
+      - N8N_DIAGNOSTICS_ENABLED=true
       - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
       - N8N_RUNNERS_ENABLED=true
+      - N8N_PORT=5679
     stop_grace_period: 1m
     restart: on-failure
     network_mode: "service:tailscale"         # ← share Tailscale network
