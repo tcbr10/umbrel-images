@@ -21,7 +21,7 @@ services:
 
   app_proxy:
     environment:
-      APP_HOST: ME-n8n_server
+      APP_HOST: me-n8n_server
       APP_PORT: 5678
       PROXY_AUTH_WHITELIST: /webhook-test/*,/webhook/*
     container_name: n8n_app_proxy
