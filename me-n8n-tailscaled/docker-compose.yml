@@ -23,7 +23,7 @@ services:
 
   app_proxy:
     environment:
-      - APP_HOST=me-n8n_server
+      - APP_HOST=me-n8n-tailscaled
       - APP_PORT=5679
     restart: on-failure
 
@@ -44,6 +44,7 @@ services:
       - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
       - N8N_RUNNERS_ENABLED=true
       - N8N_PORT=5679
+      - N8N_RUNNERS_BROKER_PORT=5680
     stop_grace_period: 1m
     restart: on-failure
     network_mode: "service:tailscale"         # ← share Tailscale network
