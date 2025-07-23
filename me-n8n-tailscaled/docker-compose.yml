@@ -1,6 +1,7 @@
 version: '3.7'
 
 services:
+  # -- THE TAILSCALE DAEMON --
   tailscale:
     image: tailscale/tailscale:latest
     container_name: tailscale
@@ -14,28 +15,33 @@ services:
       - tailscale-etc:/etc/tailscale
     environment:
       - TS_AUTHKEY=tskey-auth-kMQ7FywWud11CNTRL-XdhQsPi4t4f7DYWMico15fRUbfAtJ5NrP
-    command: tailscaled --state=/var/lib/tailscale/tailscaled.state --socket=/var/run/tailscale/tailscaled.sock
+    command:
+      - tailscaled
+      - --state=/var/lib/tailscale/tailscaled.state
+      - --socket=/var/run/tailscale/tailscaled.sock
     restart: on-failure
-    networks:
-      - n8n_net
 
+  # -- YOUR PROXY (e.g. NGINX, Caddy, custom) --
   app_proxy:
-    environment:
-      APP_HOST: me-n8n_server
-      APP_PORT: 5678
-      PROXY_AUTH_WHITELIST: /webhook-test/*,/webhook/*
+    image: your-proxy-image:latest           # ← replace with your actual proxy image
     container_name: n8n_app_proxy
     depends_on:
       - n8n_server
-    networks:
-      - n8n_net
+    environment:
+      - APP_HOST=me-n8n_server
+      - APP_PORT=5678
+      - PROXY_AUTH_WHITELIST=/webhook-test/*,/webhook/*
+    restart: on-failure
+    network_mode: "service:tailscale"         # ← share Tailscale network
 
+  # -- THE N8N BACKEND --
   n8n_server:
     image: n8nio/n8n:latest
-    restart: on-failure
+    container_name: n8n_server
+    depends_on:
+      - tailscale
     volumes:
       - ${APP_DATA_DIR}/data:/home/node/.n8n
-    stop_grace_period: 1m
     environment:
       - PUID=1000
       - PGID=1000
@@ -44,17 +50,10 @@ services:
       - N8N_DIAGNOSTICS_ENABLED=false
       - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
       - N8N_RUNNERS_ENABLED=true
-    container_name: n8n_server
-    depends_on:
-      - tailscale
-    network_mode: "service:tailscale"
-    networks:
-      - n8n_net
+    stop_grace_period: 1m
+    restart: on-failure
+    network_mode: "service:tailscale"         # ← share Tailscale network
 
 volumes:
   tailscale-var-lib:
   tailscale-etc:
-
-networks:
-  n8n_net:
-    driver: bridge
