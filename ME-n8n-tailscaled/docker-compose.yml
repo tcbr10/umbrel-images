@@ -1,14 +1,60 @@
-version: "3.7"
+version: '3.7'
 
 services:
+  tailscale:
+    image: tailscale/tailscale:latest
+    container_name: tailscale
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    devices:
+      - /dev/net/tun
+    volumes:
+      - tailscale-var-lib:/var/lib/tailscale
+      - tailscale-etc:/etc/tailscale
+    environment:
+      - TS_AUTHKEY=tskey-auth-kMQ7FywWud11CNTRL-XdhQsPi4t4f7DYWMico15fRUbfAtJ5NrP
+    command: tailscaled --state=/var/lib/tailscale/tailscaled.state --socket=/var/run/tailscale/tailscaled.sock
+    restart: on-failure
+    networks:
+      - n8n_net
 
   app_proxy:
     environment:
-      # The format here is: <app-id>_<docker-service-name>_1
-      APP_HOST: sparkles-hello-world_server_1
-      APP_PORT: 3000
-    
-  server:
-    image: getumbrel/community-app-store-hello-world:latest
-    user: "1000:1000"
-    init: true
+      APP_HOST: ME-n8n_server
+      APP_PORT: 5678
+      PROXY_AUTH_WHITELIST: /webhook-test/*,/webhook/*
+    container_name: n8n_app_proxy
+    depends_on:
+      - n8n_server
+    networks:
+      - n8n_net
+
+  n8n_server:
+    image: n8nio/n8n:latest
+    restart: on-failure
+    volumes:
+      - ${APP_DATA_DIR}/data:/home/node/.n8n
+    stop_grace_period: 1m
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - N8N_HOST=${DEVICE_DOMAIN_NAME}
+      - N8N_SECURE_COOKIE=false
+      - N8N_DIAGNOSTICS_ENABLED=false
+      - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
+      - N8N_RUNNERS_ENABLED=true
+    container_name: n8n_server
+    depends_on:
+      - tailscale
+    network_mode: "service:tailscale"
+    networks:
+      - n8n_net
+
+volumes:
+  tailscale-var-lib:
+  tailscale-etc:
+
+networks:
+  n8n_net:
+    driver: bridge
