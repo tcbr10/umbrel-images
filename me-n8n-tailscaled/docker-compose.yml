@@ -1,22 +1,10 @@
 version: '3.7'
 
 services:
-  # -- YOUR PROXY (Umbrel internal) --
-  app_proxy:
-    depends_on:
-      - tailscale
-      - n8n_server
-    environment:
-      - APP_HOST=me-n8n_server_1
-      - APP_PORT=5681
-      - PROXY_AUTH_WHITELIST=/webhook-test/*,/webhook/*
-    restart: on-failure
-    network_mode: "service:tailscale"
-
-  # -- THE TAILSCALE DAEMON --
+  # 1) Tailscale daemon + serve
   tailscale:
     image: tailscale/tailscale:latest
-    container_name: n8n_tailscale_1
+    container_name: tailscale_custom
     cap_add:
       - NET_ADMIN
       - SYS_MODULE
@@ -26,34 +14,41 @@ services:
       - tailscale-var-lib:/var/lib/tailscale
       - tailscale-etc:/etc/tailscale
     environment:
-      - TS_AUTHKEY=tskey-auth-krSV5aJxxm11CNTRL-b6TcZArfuNST2QrKbF5pNS9dXyymRJKx
-    command:
-      - tailscaled
-      - --state=/var/lib/tailscale/tailscaled.state
-      - --socket=/var/run/tailscale/tailscaled.sock
+      - TS_AUTHKEY=tskey-auth-…
+    # start tailscaled, then expose HTTP 5681 → n8n_custom:5681
+    command: >
+      sh -c "
+        tailscaled \
+          --state=/var/lib/tailscale/tailscaled.state \
+          --socket=/var/run/tailscale/tailscaled.sock &
+        # wait a moment for tailscaled to come up:
+        sleep 2
+        tailscale serve --http 5681 http://127.0.0.1:5681
+      "
     restart: on-failure
+    network_mode: bridge   # default bridge is fine here
 
-  # -- THE N8N BACKEND --
-  n8n_server:
+  # 2) Your custom n8n instance
+  n8n_custom:
     image: n8nio/n8n:latest
-    container_name: tailscaled_n8n_server_1
+    container_name: n8n_custom
     depends_on:
       - tailscale
     volumes:
-      - ${APP_DATA_DIR}/data:/home/node/.n8n
+      - ${APP_DATA_DIR}/custom-data:/home/node/.n8n
     environment:
       - PUID=1000
       - PGID=1000
-      - N8N_HOST=${DEVICE_DOMAIN_NAME}
+      - N8N_HOST=127.0.0.1
+      - N8N_PORT=5681
+      - N8N_RUNNERS_BROKER_PORT=5682
       - N8N_SECURE_COOKIE=false
       - N8N_DIAGNOSTICS_ENABLED=true
       - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
       - N8N_RUNNERS_ENABLED=true
-      - N8N_PORT=5681
-      - N8N_RUNNERS_BROKER_PORT=5680
     stop_grace_period: 1m
     restart: on-failure
-    network_mode: "service:tailscale"
+    network_mode: bridge
 
 volumes:
   tailscale-var-lib:
