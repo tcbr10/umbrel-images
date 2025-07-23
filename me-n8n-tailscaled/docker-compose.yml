@@ -27,7 +27,7 @@ services:
       - tailscale-var-lib:/var/lib/tailscale
       - tailscale-etc:/etc/tailscale
     environment:
-      - TS_AUTHKEY=tskey-auth-kMQ7FywWud11CNTRL-XdhQsPi4t4f7DYWMico15fRUbfAtJ5NrP
+      - TS_AUTHKEY=tskey-auth-krSV5aJxxm11CNTRL-b6TcZArfuNST2QrKbF5pNS9dXyymRJKx
     command:
       - tailscaled
       - --state=/var/lib/tailscale/tailscaled.state
