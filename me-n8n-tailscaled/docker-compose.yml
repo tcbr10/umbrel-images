@@ -24,7 +24,7 @@ services:
   app_proxy:
     environment:
       - APP_HOST=me-n8n-tailscaled
-      - APP_PORT=5679
+      - APP_PORT=5681
     restart: on-failure
 
   # -- THE N8N BACKEND --
@@ -43,7 +43,7 @@ services:
       - N8N_DIAGNOSTICS_ENABLED=true
       - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
       - N8N_RUNNERS_ENABLED=true
-      - N8N_PORT=5679
+      - N8N_PORT=5681
       - N8N_RUNNERS_BROKER_PORT=5680
     stop_grace_period: 1m
     restart: on-failure
