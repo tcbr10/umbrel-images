@@ -21,18 +21,11 @@ services:
       - --socket=/var/run/tailscale/tailscaled.sock
     restart: on-failure
 
-  # -- YOUR PROXY (e.g. NGINX, Caddy, custom) --
   app_proxy:
-    image: your-proxy-image:latest           # ← replace with your actual proxy image
-    container_name: n8n_app_proxy
-    depends_on:
-      - n8n_server
     environment:
       - APP_HOST=me-n8n_server
       - APP_PORT=5678
-      - PROXY_AUTH_WHITELIST=/webhook-test/*,/webhook/*
     restart: on-failure
-    network_mode: "service:tailscale"         # ← share Tailscale network
 
   # -- THE N8N BACKEND --
   n8n_server:
