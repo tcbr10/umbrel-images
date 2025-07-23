@@ -1,6 +1,19 @@
 version: '3.7'
 
 services:
+  # -- YOUR PROXY (Umbrel internal) --
+  app_proxy:
+    container_name: me_n8n_app_proxy_1
+    depends_on:
+      - tailscale
+      - n8n_server
+    environment:
+      - APP_HOST=me-n8n_server_1
+      - APP_PORT=5681
+      - PROXY_AUTH_WHITELIST=/webhook-test/*,/webhook/*
+    restart: on-failure
+    network_mode: "service:tailscale"
+
   # -- THE TAILSCALE DAEMON --
   tailscale:
     image: tailscale/tailscale:latest
@@ -19,12 +32,6 @@ services:
       - tailscaled
       - --state=/var/lib/tailscale/tailscaled.state
       - --socket=/var/run/tailscale/tailscaled.sock
-    restart: on-failure
-
-  app_proxy:
-    environment:
-      - APP_HOST=me-n8n-n8n_server_1
-      - APP_PORT=5681
     restart: on-failure
 
   # -- THE N8N BACKEND --
@@ -47,7 +54,7 @@ services:
       - N8N_RUNNERS_BROKER_PORT=5680
     stop_grace_period: 1m
     restart: on-failure
-    network_mode: "service:tailscale"         # ← share Tailscale network
+    network_mode: "service:tailscale"
 
 volumes:
   tailscale-var-lib:
