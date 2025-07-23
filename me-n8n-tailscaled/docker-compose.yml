@@ -3,7 +3,6 @@ version: '3.7'
 services:
   # -- YOUR PROXY (Umbrel internal) --
   app_proxy:
-    container_name: me-tsn8n_app_proxy_1
     depends_on:
       - tailscale
       - n8n_server
