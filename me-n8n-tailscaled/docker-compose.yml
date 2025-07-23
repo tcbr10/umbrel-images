@@ -4,7 +4,7 @@ services:
   # -- THE TAILSCALE DAEMON --
   tailscale:
     image: tailscale/tailscale:latest
-    container_name: tailscale
+    container_name: n8n_tailscale_1
     cap_add:
       - NET_ADMIN
       - SYS_MODULE
