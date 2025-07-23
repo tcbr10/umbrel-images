@@ -23,18 +23,18 @@ services:
 
   app_proxy:
     environment:
-      - APP_HOST=me-n8n-tailscaled
+      - APP_HOST=me-n8n-n8n_server_1
       - APP_PORT=5681
     restart: on-failure
 
   # -- THE N8N BACKEND --
   n8n_server:
     image: n8nio/n8n:latest
-    container_name: n8n_server
+    container_name: tailscaled_n8n_server_1
     depends_on:
       - tailscale
     volumes:
-      - ${APP_DATA_DIR}/data:/home/node/.n8n1
+      - ${APP_DATA_DIR}/data:/home/node/.n8n
     environment:
       - PUID=1000
       - PGID=1000
