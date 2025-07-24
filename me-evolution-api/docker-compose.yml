@@ -1,0 +1,68 @@
+# docker-compose.yml
+version: '3.8'
+
+services:
+  app_proxy:
+    environment:
+      APP_HOST: evolution-api_api_1
+      APP_PORT: 3500
+      
+      
+  api:
+    container_name: evolution_api
+    image: atendai/evolution-api:homolog # The Evolution API program
+    restart: always # Keep it running
+    depends_on:
+      - redis # Start Redis first
+      - postgres # Start PostgreSQL first
+    ports:
+      - 3500:3000 # Access the API at http://localhost:3000
+    volumes:
+      - evolution_instances:/evolution/instances # Saves WhatsApp session data
+    networks:
+      - evolution-net
+    env_file:
+      - .env # Load settings from a .env file
+    expose:
+      - 3000
+
+  redis:
+    image: redis:latest # The Redis caching program
+    networks:
+      - evolution-net
+    container_name: redis
+    command: >
+      redis-server --port 6379 --appendonly yes
+    volumes:
+      - evolution_redis:/data # Saves Redis data
+    ports:
+      - 6380:6379 # Access Redis at http://localhost:6380 (if needed)
+
+  postgres:
+    container_name: postgres
+    image: postgres:15 # The PostgreSQL database program
+    networks:
+      - evolution-net
+    command: ["postgres", "-c", "max_connections=1000", "-c", "listen_addresses=*"]
+    restart: always # Keep it running
+    ports:
+      - 5433:5432 # Access PostgreSQL at http://localhost:5433 (if needed)
+    environment:
+      POSTGRES_USER: myuser # Your database username
+      POSTGRES_PASSWORD: mypassword # Your database password (CHANGE THIS!)
+      POSTGRES_DB: evolution_db # Your database name
+      POSTGRES_HOST_AUTH_METHOD: trust # Makes connecting easier for local testing
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # Saves your database data
+    expose:
+      - 5432
+
+volumes:
+  evolution_instances: # Stores Evolution API session info
+  evolution_redis:     # Stores Redis data
+  postgres_data:       # Stores PostgreSQL database info
+
+networks:
+  evolution-net:
+    name: evolution-net # A private network for these programs to talk to each other
+    driver: bridge
