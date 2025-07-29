@@ -1,0 +1,22 @@
+slug: cadvisor
+version: 0.1.0
+name: cadvisor
+description: Container monitoring tool by Google
+repository: https://github.com/tcbr10/umbrel-images/cadvisor
+ports:
+  - container: 8080
+    host: 9080
+privileged: true
+volumes:
+  - host: /
+    container: /rootfs
+    readonly: true
+  - host: /var/run
+    container: /var/run
+  - host: /sys
+    container: /sys
+    readonly: true
+  - host: /var/lib/docker
+    container: /var/lib/docker
+    readonly: true
+network_mode: host
