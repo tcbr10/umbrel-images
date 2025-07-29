@@ -10,3 +10,5 @@ services:
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
     network_mode: host
+    ports: 
+      - 9080:8080
