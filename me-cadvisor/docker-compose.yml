@@ -7,7 +7,6 @@ services:
 
     # Point cadvisor at the right cgroup and sysfs roots:
     command:
-      - --root_cgroup=/
       - --docker_only=false
       - --housekeeping_interval=1s
       - --sysfs_path=/sys
