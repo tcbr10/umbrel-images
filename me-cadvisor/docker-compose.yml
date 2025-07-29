@@ -4,11 +4,28 @@ services:
     restart: on-failure
     stop_grace_period: 1m
     privileged: true
+
+    # Point cadvisor at the right cgroup and sysfs roots:
+    command:
+      - --root_cgroup=/
+      - --docker_only=false
+      - --housekeeping_interval=1s
+      - --sysfs_path=/sys
+      - --cgroup_root=/sys/fs/cgroup
+
     volumes:
+      # host rootfs (for filesystem stats)
       - /:/rootfs:ro
+      # Docker runtime & socket
       - /var/run:/var/run:rw
+      # kernel sysfs (for hardware metrics)
       - /sys:/sys:ro
+      # full cgroup tree (v1 & v2)
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      # Docker image and container data
       - /var/lib/docker/:/var/lib/docker:ro
+
+    # host networking so ports and interfaces line up
     network_mode: host
     ports: 
       - 9080:8080
