@@ -1,0 +1,28 @@
+manifestVersion: 1
+id: myapps-android-studio
+name: Android Studio
+tagline: Android development IDE in your browser
+icon: https://developer.android.com/static/images/brand/Android_Robot.svg
+category: Development
+version: "2024.1.1"
+port: 3025
+description: >-
+  Android Studio provides a complete IDE for Android app development,
+  accessible via web browser using KasmVNC.
+  
+  Features:
+  - Full Android Studio IDE
+  - Hardware-accelerated emulator support
+  - Browser-based access (no VNC client needed)
+  - Persistent project storage
+
+developer: ME
+website: https://developer.android.com/studio
+submitter: ME
+submission: https://github.com/tcbr10/umbrel-images
+repo: https://github.com/tcbr10/umbrel-images
+support: https://github.com/tcbr10/umbrel-images/issues
+gallery:
+  - https://developer.android.com/static/studio/images/studio-home.png
+releaseNotes: >-
+  Initial release with Android Studio 2024.1.1
