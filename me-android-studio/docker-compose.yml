@@ -18,8 +18,8 @@ services:
       TZ: Asia/Jerusalem
     volumes:
       - ${APP_DATA_DIR}/data:/config
-    devices:
-      - /dev/kvm
+    # devices:
+    #   - /dev/kvm
     privileged: true
     security_opt:
       - seccomp:unconfined
