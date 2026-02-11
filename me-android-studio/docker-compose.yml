@@ -3,7 +3,7 @@ version: "3.7"
 services:
   app_proxy:
     environment:
-      APP_HOST: me-android-studio_1
+      APP_HOST: me-android-studio_server_1
       APP_PORT: 3000
 
   server:
@@ -18,8 +18,8 @@ services:
       TZ: Asia/Jerusalem
     volumes:
       - ${APP_DATA_DIR}/data:/config
-    # devices:
-    #   - /dev/kvm
+    devices:
+      - /dev/kvm
     privileged: false
     security_opt:
       - seccomp:unconfined
