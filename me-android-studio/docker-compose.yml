@@ -20,7 +20,7 @@ services:
       - ${APP_DATA_DIR}/data:/config
     # devices:
     #   - /dev/kvm
-    privileged: true
+    privileged: false
     security_opt:
       - seccomp:unconfined
     shm_size: "2gb"
