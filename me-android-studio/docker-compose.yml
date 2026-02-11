@@ -20,7 +20,6 @@ services:
       - ${APP_DATA_DIR}/data:/config
     devices:
       - /dev/kvm
-      - /dev/dri
     privileged: true
     security_opt:
       - seccomp:unconfined
