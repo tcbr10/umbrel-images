@@ -4,7 +4,7 @@ name: Android Studio
 tagline: Android development IDE in your browser
 icon: https://developer.android.com/static/images/brand/Android_Robot.svg
 category: Development
-version: "2024.1.1"
+version: "2024.1.2"
 port: 3025
 description: >-
   Android Studio provides a complete IDE for Android app development,
