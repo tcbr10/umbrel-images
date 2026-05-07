@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-export APP_FLIPBOOK_IMAGE="ghcr.io/your-github-user/album-flipbook:1.2.0"
+export APP_FLIPBOOK_IMAGE="ghcr.io/tcbr10/album-flipbook:1.2.0"
