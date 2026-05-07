@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Album Flipbook Secure</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">Umbrel app</p>
+      <h1 id="albumTitle">Album Flipbook</h1>
+      <p id="albumSubtitle" class="subtitle">Password-protected viewer with live uploads</p>
+    </div>
+    <div class="top-actions">
+      <button class="btn secondary" id="prevBtn" aria-label="Previous page">‹</button>
+      <span id="pageLabel" class="page-label">Page 0 / 0</span>
+      <button class="btn secondary" id="nextBtn" aria-label="Next page">›</button>
+      <button class="btn secondary" id="fullscreenBtn">Fullscreen</button>
+      <button class="btn secondary hidden" id="lockViewerBtn">Lock viewer</button>
+      <button class="btn" id="adminToggleBtn">Admin</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="viewer-card">
+      <div id="status" class="status">Loading album…</div>
+      <div id="bookWrap" class="book-wrap hidden">
+        <div id="flipbook"></div>
+      </div>
+    </section>
+
+    <aside class="admin-card hidden" id="adminPanel">
+      <div class="stack">
+        <div>
+          <p class="eyebrow">Admin panel</p>
+          <h2>Upload and security</h2>
+          <p class="muted">Default admin password is <code>umbrel</code> until you change it.</p>
+        </div>
+
+        <form id="securityForm" class="stack boxed-form">
+          <h3>Passwords</h3>
+          <label class="check"><input type="checkbox" name="viewerProtected" /> Require password for viewer screen</label>
+          <label>New viewer password<input type="text" name="viewerPassword" placeholder="Leave blank to keep current viewer password" /></label>
+          <label>New admin password<input type="text" name="adminPassword" placeholder="Leave blank to keep current admin password" /></label>
+          <button class="btn" type="submit">Save passwords</button>
+        </form>
+
+        <form id="metaForm" class="stack boxed-form">
+          <h3>Album text</h3>
+          <label>Title<input type="text" name="title" placeholder="Album title" /></label>
+          <label>Subtitle<input type="text" name="subtitle" placeholder="Short description" /></label>
+          <label class="check"><input type="checkbox" name="showCover" checked /> Treat first page as cover</label>
+          <button class="btn" type="submit">Save text</button>
+        </form>
+
+        <form id="pdfForm" class="stack boxed-form">
+          <h3>Upload PDF</h3>
+          <label>PDF file<input type="file" name="file" accept="application/pdf" required /></label>
+          <label>Title<input type="text" name="title" placeholder="Album title" /></label>
+          <label>Subtitle<input type="text" name="subtitle" placeholder="Uploaded PDF" /></label>
+          <label class="check"><input type="checkbox" name="replace" checked /> Replace existing album</label>
+          <label class="check"><input type="checkbox" name="showCover" checked /> Treat first page as cover</label>
+          <button class="btn" type="submit">Upload PDF</button>
+        </form>
+
+        <form id="imagesForm" class="stack boxed-form">
+          <h3>Upload images</h3>
+          <label>Images<input type="file" name="files" accept="image/png,image/jpeg,image/webp" multiple required /></label>
+          <label>Title<input type="text" name="title" placeholder="Album title" /></label>
+          <label>Subtitle<input type="text" name="subtitle" placeholder="Uploaded images" /></label>
+          <label class="check"><input type="checkbox" name="replace" checked /> Replace existing album</label>
+          <label class="check"><input type="checkbox" name="showCover" checked /> Treat first page as cover</label>
+          <button class="btn" type="submit">Upload images</button>
+        </form>
+
+        <div class="row">
+          <button class="btn danger" id="clearBtn" type="button">Clear album</button>
+          <button class="btn secondary" id="logoutAdminBtn" type="button">Logout admin</button>
+        </div>
+        <p id="adminMsg" class="muted"></p>
+      </div>
+    </aside>
+  </main>
+
+  <div class="overlay hidden" id="viewerLoginOverlay">
+    <form class="modal" id="viewerLoginForm">
+      <p class="eyebrow">Viewer access</p>
+      <h2>Password required</h2>
+      <p class="muted">Enter the viewing password to open the album.</p>
+      <label>Password<input type="password" name="password" required /></label>
+      <button class="btn" type="submit">Open album</button>
+      <p id="viewerMsg" class="muted"></p>
+    </form>
+  </div>
+
+  <div class="overlay hidden" id="adminLoginOverlay">
+    <form class="modal" id="adminLoginForm">
+      <p class="eyebrow">Admin access</p>
+      <h2>Enter admin password</h2>
+      <p class="muted">Use the admin password to upload files and change protection settings.</p>
+      <label>Password<input type="password" name="password" required /></label>
+      <button class="btn" type="submit">Open admin panel</button>
+      <button class="btn secondary" id="cancelAdminLoginBtn" type="button">Cancel</button>
+      <p id="adminLoginMsg" class="muted"></p>
+    </form>
+  </div>
+
+  <script src="/static/vendor/page-flip.browser.js"></script>
+  <script src="/static/app.js" defer></script>
+</body>
+</html>
