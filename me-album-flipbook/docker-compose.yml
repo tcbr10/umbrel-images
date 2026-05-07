@@ -3,7 +3,7 @@ version: "3.7"
 services:
   app_proxy:
     environment:
-      APP_HOST: album-flipbook_server_1
+      APP_HOST: me-album-flipbook_server_1
       APP_PORT: 8080
 
   server:
