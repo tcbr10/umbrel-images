@@ -1,0 +1,28 @@
+manifestVersion: 1
+id: me-album-flipbook
+category: media
+name: album-flipbook
+icon: icon.svg
+tagline: Upload albums and protect the viewer with a password
+version: "1.2.0"
+description: >-
+  Self-hosted flipbook for Umbrel with live uploads,
+  protected admin access, and an optional viewer password.
+  Upload a PDF or image files while the app is running,
+  then lock the viewing screen with a password you can change from the admin panel.
+releaseNotes: >-
+  Added admin login and configurable viewer password protection.
+developer: me
+website: https://github.com/your-github-user/your-app-store
+repo: https://github.com/your-github-user/your-app-store
+support: https://github.com/your-github-user/your-app-store/issues
+port: 3017
+gallery:
+  - gallery/1.png
+  - gallery/2.png
+  - gallery/3.png
+path: ""
+defaultUsername: ""
+defaultPassword: ""
+submitter: me
+submission: https://github.com/your-github-user/your-app-store
