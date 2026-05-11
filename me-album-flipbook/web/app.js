@@ -20,19 +20,13 @@ function setText(id, text) {
 function setAdminMsg(msg, err = false) {
   const el = document.getElementById('adminMsg');
   el.textContent = msg;
-  el.style.color = err ? '#ffd5d9' : '';
+  el.style.color = err ? '#ffb3b8' : '';
 }
 
 function setViewerMsg(msg, err = false) {
   const el = document.getElementById('viewerMsg');
   el.textContent = msg;
-  el.style.color = err ? '#ffd5d9' : '';
-}
-
-function setAdminLoginMsg(msg, err = false) {
-  const el = document.getElementById('adminLoginMsg');
-  el.textContent = msg;
-  el.style.color = err ? '#ffd5d9' : '';
+  el.style.color = err ? '#ffb3b8' : '';
 }
 
 function updatePageLabel() {
@@ -44,14 +38,47 @@ function updatePageLabel() {
   label.textContent = `Page ${flipbook.getCurrentPageIndex() + 1} / ${flipbook.getPageCount()}`;
 }
 
+// Admin Panel Toggle & Routing
+async function handleRoute() {
+  const hash = window.location.hash;
+  if (hash === '#admin') {
+    const status = await api('/api/admin/status');
+    adminAuthed = !!status.authenticated;
+    if (adminAuthed) {
+      document.getElementById('adminPanel').classList.remove('hidden');
+      document.getElementById('mainLayout').classList.add('has-admin');
+      await loadSecurityForm();
+    } else {
+      document.getElementById('adminLoginOverlay').classList.remove('hidden');
+    }
+  } else {
+    document.getElementById('adminPanel').classList.add('hidden');
+    document.getElementById('mainLayout').classList.remove('has-admin');
+    document.getElementById('adminLoginOverlay').classList.add('hidden');
+  }
+}
+
+function closeAdmin() {
+  window.location.hash = '';
+}
+
+function setDims(w, h) {
+  const form = document.getElementById('metaForm');
+  form.pageWidth.value = w;
+  form.pageHeight.value = h;
+}
+
 async function loadPublicConfig() {
   publicConfig = await api('/api/public-config');
   setText('albumTitle', publicConfig.title || 'Album Flipbook');
   setText('albumSubtitle', publicConfig.subtitle || '');
-  document.getElementById('lockViewerBtn').classList.toggle('hidden', !publicConfig.viewerProtected);
+
   const overlay = document.getElementById('viewerLoginOverlay');
-  if (publicConfig.viewerProtected) overlay.classList.remove('hidden');
-  else overlay.classList.add('hidden');
+  if (publicConfig.viewerProtected) {
+    overlay.classList.remove('hidden');
+  } else {
+    overlay.classList.add('hidden');
+  }
 }
 
 async function loadManifest() {
@@ -78,32 +105,37 @@ function renderBook() {
   container.innerHTML = '';
 
   if (!currentManifest?.pageUrls?.length) {
-    status.textContent = 'No pages yet. Use the admin panel to upload a PDF or images.';
+    status.textContent = 'No pages yet. Log in to admin panel to upload.';
     status.classList.remove('hidden');
     wrap.classList.add('hidden');
     updatePageLabel();
     return;
   }
 
+  // Dynamic dimensions based on admin config
+  const pWidth = currentManifest.pageWidth || 700;
+  const pHeight = currentManifest.pageHeight || 1000;
+
   flipbook = new St.PageFlip(container, {
-    width: 700,
-    height: 1000,
+    width: pWidth,
+    height: pHeight,
     size: 'stretch',
     minWidth: 280,
-    maxWidth: 1400,
+    maxWidth: pWidth * 2,
     minHeight: 400,
-    maxHeight: 1000,
+    maxHeight: pHeight * 2,
     showCover: currentManifest.showCover !== false,
     drawShadow: true,
     flippingTime: 900,
     usePortrait: true,
-    maxShadowOpacity: 0.28,
+    maxShadowOpacity: 0.25,
     mobileScrollSupport: false,
     swipeDistance: 24,
     clickEventForward: true,
     useMouseEvents: true,
     autoSize: true,
   });
+
   flipbook.on('init', updatePageLabel);
   flipbook.on('flip', updatePageLabel);
   flipbook.loadFromImages(currentManifest.pageUrls);
@@ -111,10 +143,14 @@ function renderBook() {
   wrap.classList.remove('hidden');
   updatePageLabel();
 
+  // Populate admin forms with current values
   const meta = document.getElementById('metaForm');
   meta.title.value = currentManifest.title || '';
   meta.subtitle.value = currentManifest.subtitle || '';
+  meta.pageWidth.value = pWidth;
+  meta.pageHeight.value = pHeight;
   meta.showCover.checked = currentManifest.showCover !== false;
+
   setText('albumTitle', currentManifest.title || 'Album Flipbook');
   setText('albumSubtitle', currentManifest.subtitle || '');
 }
@@ -123,21 +159,8 @@ async function refreshAll() {
   await loadPublicConfig();
   if (!publicConfig.viewerProtected) {
     await loadManifest();
-    return;
-  }
-  try {
-    await loadManifest();
-  } catch (_) {}
-}
-
-async function openAdminPanel() {
-  const status = await api('/api/admin/status');
-  adminAuthed = !!status.authenticated;
-  if (adminAuthed) {
-    document.getElementById('adminPanel').classList.toggle('hidden');
-    await loadSecurityForm();
   } else {
-    document.getElementById('adminLoginOverlay').classList.remove('hidden');
+    try { await loadManifest(); } catch (_) {}
   }
 }
 
@@ -147,6 +170,7 @@ async function loadSecurityForm() {
   form.viewerProtected.checked = !!sec.viewerProtected;
 }
 
+// Event Handlers
 async function handleViewerLogin(e) {
   e.preventDefault();
   try {
@@ -175,12 +199,13 @@ async function handleAdminLogin(e) {
     });
     adminAuthed = true;
     e.currentTarget.reset();
-    setAdminLoginMsg('');
-    document.getElementById('adminLoginOverlay').classList.add('hidden');
-    document.getElementById('adminPanel').classList.remove('hidden');
-    await loadSecurityForm();
+    document.getElementById('adminLoginMsg').textContent = '';
+
+    // Reroute to open panel
+    handleRoute();
   } catch (err) {
-    setAdminLoginMsg(err.message, true);
+    document.getElementById('adminLoginMsg').textContent = err.message;
+    document.getElementById('adminLoginMsg').style.color = '#ffb3b8';
   }
 }
 
@@ -218,10 +243,12 @@ async function handleMetaSave(e) {
         title: fd.get('title') || 'Album Flipbook',
         subtitle: fd.get('subtitle') || '',
         showCover: fd.get('showCover') === 'on',
+        pageWidth: parseInt(fd.get('pageWidth')) || 700,
+        pageHeight: parseInt(fd.get('pageHeight')) || 1000
       }),
     });
     await refreshAll();
-    setAdminMsg('Album text updated.');
+    setAdminMsg('Settings updated. Layout recalculated.');
   } catch (err) {
     setAdminMsg(err.message, true);
   }
@@ -230,7 +257,7 @@ async function handleMetaSave(e) {
 async function handleUpload(e, url) {
   e.preventDefault();
   try {
-    setAdminMsg('Uploading…');
+    setAdminMsg('Uploading... Please wait.');
     const fd = new FormData(e.currentTarget);
     const res = await fetch(url, { method: 'POST', body: fd });
     const data = await res.json();
@@ -256,38 +283,44 @@ async function clearAlbum() {
 async function logoutAdmin() {
   await api('/api/admin/logout', { method: 'POST' });
   adminAuthed = false;
-  document.getElementById('adminPanel').classList.add('hidden');
-  setAdminMsg('');
-}
-
-async function lockViewer() {
-  await api('/api/viewer/logout', { method: 'POST' });
-  await refreshAll();
+  closeAdmin();
 }
 
 function bindUi() {
+  // Navigation & View
   document.getElementById('prevBtn').addEventListener('click', () => flipbook && flipbook.flipPrev('top'));
   document.getElementById('nextBtn').addEventListener('click', () => flipbook && flipbook.flipNext('top'));
   document.getElementById('fullscreenBtn').addEventListener('click', async () => {
     if (!document.fullscreenElement) await document.documentElement.requestFullscreen();
     else await document.exitFullscreen();
   });
-  document.getElementById('lockViewerBtn').addEventListener('click', lockViewer);
-  document.getElementById('adminToggleBtn').addEventListener('click', openAdminPanel);
+
+  // Hash routing
+  window.addEventListener('hashchange', handleRoute);
+  document.getElementById('closeAdminBtn').addEventListener('click', closeAdmin);
+  document.getElementById('cancelAdminLoginBtn').addEventListener('click', closeAdmin);
+
+  // Forms
   document.getElementById('viewerLoginForm').addEventListener('submit', handleViewerLogin);
   document.getElementById('adminLoginForm').addEventListener('submit', handleAdminLogin);
-  document.getElementById('cancelAdminLoginBtn').addEventListener('click', () => document.getElementById('adminLoginOverlay').classList.add('hidden'));
   document.getElementById('securityForm').addEventListener('submit', handleSecuritySave);
   document.getElementById('metaForm').addEventListener('submit', handleMetaSave);
   document.getElementById('pdfForm').addEventListener('submit', (e) => handleUpload(e, '/api/upload/pdf'));
   document.getElementById('imagesForm').addEventListener('submit', (e) => handleUpload(e, '/api/upload/images'));
   document.getElementById('clearBtn').addEventListener('click', clearAlbum);
   document.getElementById('logoutAdminBtn').addEventListener('click', logoutAdmin);
+
+  // Keyboard
   window.addEventListener('keydown', (e) => {
+    if (document.activeElement.tagName === 'INPUT') return;
     if (e.key === 'ArrowLeft') flipbook && flipbook.flipPrev('top');
     if (e.key === 'ArrowRight') flipbook && flipbook.flipNext('top');
   });
 }
 
+// Global expose for preset buttons
+window.setDims = setDims;
+
 bindUi();
-refreshAll().catch((err) => setAdminMsg(err.message, true));
+handleRoute();
+refreshAll().catch((err) => console.error(err));
