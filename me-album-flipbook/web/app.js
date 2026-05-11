@@ -173,14 +173,15 @@ async function loadSecurityForm() {
 // Event Handlers
 async function handleViewerLogin(e) {
   e.preventDefault();
+  const form = e.target;
   try {
-    const fd = new FormData(e.currentTarget);
+    const fd = new FormData(form);
     await api('/api/viewer/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ password: fd.get('password') || '' }),
     });
-    e.currentTarget.reset();
+    form.reset();
     setViewerMsg('');
     await loadManifest();
   } catch (err) {
@@ -190,17 +191,18 @@ async function handleViewerLogin(e) {
 
 async function handleAdminLogin(e) {
   e.preventDefault();
+  const form = e.target;
   try {
-    const fd = new FormData(e.currentTarget);
+    const fd = new FormData(form);
     await api('/api/admin/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ password: fd.get('password') || '' }),
     });
     adminAuthed = true;
-    e.currentTarget.reset();
+    form.reset();
     document.getElementById('adminLoginMsg').textContent = '';
-
+    
     // Reroute to open panel
     handleRoute();
   } catch (err) {
@@ -211,8 +213,9 @@ async function handleAdminLogin(e) {
 
 async function handleSecuritySave(e) {
   e.preventDefault();
+  const form = e.target;
   try {
-    const fd = new FormData(e.currentTarget);
+    const fd = new FormData(form);
     const payload = {
       viewerProtected: fd.get('viewerProtected') === 'on',
       viewerPassword: fd.get('viewerPassword') || '',
@@ -223,7 +226,7 @@ async function handleSecuritySave(e) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
-    e.currentTarget.reset();
+    form.reset();
     await loadSecurityForm();
     await refreshAll();
     setAdminMsg(result.adminPasswordChanged ? 'Security updated. Admin password changed.' : 'Security updated.');
@@ -234,8 +237,9 @@ async function handleSecuritySave(e) {
 
 async function handleMetaSave(e) {
   e.preventDefault();
+  const form = e.target;
   try {
-    const fd = new FormData(e.currentTarget);
+    const fd = new FormData(form);
     await api('/api/meta', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -256,13 +260,14 @@ async function handleMetaSave(e) {
 
 async function handleUpload(e, url) {
   e.preventDefault();
+  const form = e.target;
   try {
     setAdminMsg('Uploading... Please wait.');
-    const fd = new FormData(e.currentTarget);
+    const fd = new FormData(form);
     const res = await fetch(url, { method: 'POST', body: fd });
     const data = await res.json();
     if (!res.ok) throw new Error(data?.detail || 'Upload failed');
-    e.currentTarget.reset();
+    form.reset();
     await refreshAll();
     setAdminMsg('Upload complete.');
   } catch (err) {
