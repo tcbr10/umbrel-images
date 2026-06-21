@@ -1,9 +1,7 @@
-
 let currentManifest = null;
 let publicConfig = null;
 let adminAuthed = false;
 let isBookReady = false;
-
 
 async function api(url, options = {}) {
   const res = await fetch(url, options);
@@ -51,7 +49,7 @@ async function handleRoute() {
       document.getElementById('adminPanel').classList.remove('hidden');
       document.getElementById('mainLayout').classList.add('has-admin');
       await loadSecurityForm();
-      setTimeout(resizeBook, 300); // trigger resize when panel opens
+      setTimeout(resizeBook, 300);
     } else {
       document.getElementById('adminLoginOverlay').classList.remove('hidden');
     }
@@ -77,7 +75,7 @@ async function loadPublicConfig() {
   publicConfig = await api('/api/public-config');
   setText('albumTitle', publicConfig.title || 'Album Flipbook');
   setText('albumSubtitle', publicConfig.subtitle || '');
-
+  
   const overlay = document.getElementById('viewerLoginOverlay');
   if (publicConfig.viewerProtected) {
     overlay.classList.remove('hidden');
@@ -88,21 +86,25 @@ async function loadPublicConfig() {
 
 function resizeBook() {
   const wrap = document.getElementById('bookWrap');
-  const book = document.getElementById('flipbook');
+  const $book = $('#flipbook');
   if (!wrap || !isBookReady || !currentManifest) return;
-
+  
   const pWidth = currentManifest.pageWidth || 700;
   const pHeight = currentManifest.pageHeight || 1000;
-  const isMobile = window.innerWidth < 768;
-  const bookTotalWidth = isMobile ? pWidth : pWidth * 2;
-
-  const scaleW = wrap.clientWidth / bookTotalWidth;
+  const isMobile = window.innerWidth < 600;
+  const originalTotalWidth = isMobile ? pWidth : (pWidth * 2);
+  
+  const scaleW = wrap.clientWidth / originalTotalWidth;
   const scaleH = wrap.clientHeight / pHeight;
   let scale = Math.min(scaleW, scaleH) * 0.95;
   if (scale > 1) scale = 1;
 
-  book.style.transform = `scale(${scale})`;
-  book.style.transformOrigin = 'center center';
+  // Use turn.js native resizing instead of CSS transforms
+  const newWidth = Math.floor(originalTotalWidth * scale);
+  const newHeight = Math.floor(pHeight * scale);
+  
+  $book.css('transform', ''); // Clean any leftover transforms
+  $book.turn('size', newWidth, newHeight);
 }
 
 async function loadManifest() {
@@ -126,7 +128,7 @@ function renderBook() {
   const status = document.getElementById('status');
   const wrap = document.getElementById('bookWrap');
   const $book = $('#flipbook');
-  
+
   if (!currentManifest?.pageUrls?.length) {
     status.textContent = 'No pages yet. Log in to admin panel to upload.';
     status.classList.remove('hidden');
@@ -141,17 +143,20 @@ function renderBook() {
 
   const pWidth = currentManifest.pageWidth || 700;
   const pHeight = currentManifest.pageHeight || 1000;
-  const isMobile = window.innerWidth < 768;
+  const isMobile = window.innerWidth < 600;
+  const viewMode = isMobile ? 'single' : 'double';
 
   if (isBookReady) {
     $book.turn('destroy');
     isBookReady = false;
   }
+  
   $book.html('');
-  $book.css('transform', 'none');
+  $book.css('transform', ''); // Remove transform
 
-  currentManifest.pageUrls.forEach(url => {
-    const div = $('<div />').css({
+  currentManifest.pageUrls.forEach((url, i) => {
+    const cls = (i % 2 === 0) ? 'p-even' : 'p-odd';
+    const div = $(`<div class="${cls}" />`).css({
       'background-image': `url(${url})`,
       'background-size': '100% 100%',
       'background-color': '#fff'
@@ -160,9 +165,9 @@ function renderBook() {
   });
 
   $book.turn({
-    width: isMobile ? pWidth : pWidth * 2,
+    width: isMobile ? pWidth : (pWidth * 2),
     height: pHeight,
-    display: isMobile ? 'single' : 'double',
+    display: viewMode,
     autoCenter: true,
     gradients: true,
     elevation: 50,
@@ -175,6 +180,8 @@ function renderBook() {
 
   isBookReady = true;
   updatePageLabel();
+  
+  // Instantly resize to fit the screen natively
   resizeBook();
 
   const meta = document.getElementById('metaForm');
@@ -183,7 +190,7 @@ function renderBook() {
   meta.pageWidth.value = pWidth;
   meta.pageHeight.value = pHeight;
   meta.showCover.checked = currentManifest.showCover !== false;
-
+  
   setText('albumTitle', currentManifest.title || 'Album Flipbook');
   setText('albumSubtitle', currentManifest.subtitle || '');
 }
@@ -203,7 +210,6 @@ async function loadSecurityForm() {
   form.viewerProtected.checked = !!sec.viewerProtected;
 }
 
-// Event Handlers
 async function handleViewerLogin(e) {
   e.preventDefault();
   const form = e.target;
@@ -322,20 +328,21 @@ async function logoutAdmin() {
   closeAdmin();
 }
 
-  function bindUi() {
+function bindUi() {
   document.getElementById('prevBtn').addEventListener('click', () => isBookReady && $('#flipbook').turn('previous'));
   document.getElementById('nextBtn').addEventListener('click', () => isBookReady && $('#flipbook').turn('next'));
+  
   document.getElementById('fullscreenBtn').addEventListener('click', async () => {
     if (!document.fullscreenElement) await document.documentElement.requestFullscreen();
     else await document.exitFullscreen();
   });
-
+  
   window.addEventListener('hashchange', handleRoute);
   window.addEventListener('resize', resizeBook);
-
+  
   document.getElementById('closeAdminBtn').addEventListener('click', closeAdmin);
   document.getElementById('cancelAdminLoginBtn').addEventListener('click', closeAdmin);
-
+  
   document.getElementById('viewerLoginForm').addEventListener('submit', handleViewerLogin);
   document.getElementById('adminLoginForm').addEventListener('submit', handleAdminLogin);
   document.getElementById('securityForm').addEventListener('submit', handleSecuritySave);
@@ -344,14 +351,13 @@ async function logoutAdmin() {
   document.getElementById('imagesForm').addEventListener('submit', (e) => handleUpload(e, '/api/upload/images'));
   document.getElementById('clearBtn').addEventListener('click', clearAlbum);
   document.getElementById('logoutAdminBtn').addEventListener('click', logoutAdmin);
-
-    window.addEventListener('keydown', (e) => {
+  
+  window.addEventListener('keydown', (e) => {
     if (document.activeElement.tagName === 'INPUT') return;
     if (e.key === 'ArrowLeft') { isBookReady && $('#flipbook').turn('previous'); }
     if (e.key === 'ArrowRight') { isBookReady && $('#flipbook').turn('next'); }
   });
 }
-
 
 window.setDims = setDims;
 bindUi();
