@@ -49,7 +49,8 @@ def load_manifest():
         'showCover': True,
         'pageWidth': 700,
         'pageHeight': 1000,
-        'pages': []
+        'pages': [],
+        'rtl': False          # <--- הוסף את השורה הזו
     })
 
 def save_manifest(data):
@@ -175,6 +176,8 @@ class MetaPayload(BaseModel):
     showCover: Optional[bool] = None
     pageWidth: Optional[int] = None
     pageHeight: Optional[int] = None
+    rtl: Optional[bool] = None     # <--- הוסף את השורה הזו
+
 
 class SecurityPayload(BaseModel):
     viewerProtected: bool = False
@@ -321,6 +324,7 @@ def api_meta(payload: MetaPayload, request: Request):
     if payload.showCover is not None: manifest['showCover'] = payload.showCover
     if payload.pageWidth is not None: manifest['pageWidth'] = payload.pageWidth
     if payload.pageHeight is not None: manifest['pageHeight'] = payload.pageHeight
+    if payload.rtl is not None: manifest['rtl'] = payload.rtl         # <--- הוסף את השורה הזו
     save_manifest(manifest)
     return {'ok': True, 'manifest': manifest}
 

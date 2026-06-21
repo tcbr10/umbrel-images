@@ -1,11 +1,13 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Album Flipbook</title>
   <link rel="stylesheet" href="/static/styles.css" />
 </head>
+
 <body>
   <!-- Header (Visible to clients) -->
   <header class="topbar">
@@ -45,6 +47,11 @@
         </div>
 
         <form id="metaForm" class="stack boxed-form">
+          <label class="check mt-2">
+            <input type="checkbox" name="rtl" id="rtlToggle" />
+            Right-to-Left (Hebrew/Arabic)
+          </label>
+
           <h3>Album details & Dimensions</h3>
           <p class="muted text-sm">Adjust layout to fit A4, A5, Square, etc.</p>
           <label>Title<input type="text" name="title" placeholder="Album title" /></label>
@@ -61,7 +68,8 @@
             <button type="button" class="btn outline sm" onclick="setDims(500, 700)">A5 Portrait</button>
           </div>
 
-          <label class="check mt-2"><input type="checkbox" name="showCover" checked /> Treat first page as front cover</label>
+          <label class="check mt-2"><input type="checkbox" name="showCover" checked /> Treat first page as front
+            cover</label>
           <button class="btn" type="submit">Save Settings</button>
         </form>
 
@@ -74,7 +82,8 @@
 
         <form id="imagesForm" class="stack boxed-form">
           <h3>Upload images</h3>
-          <label>Images<input type="file" name="files" accept="image/png,image/jpeg,image/webp" multiple required /></label>
+          <label>Images<input type="file" name="files" accept="image/png,image/jpeg,image/webp" multiple
+              required /></label>
           <label class="check"><input type="checkbox" name="replace" checked /> Clear existing pages</label>
           <button class="btn" type="submit">Upload Images</button>
         </form>
@@ -82,8 +91,10 @@
         <form id="securityForm" class="stack boxed-form mt-4">
           <h3>Security</h3>
           <label class="check"><input type="checkbox" name="viewerProtected" /> Require viewer password</label>
-          <label>New viewer password<input type="text" name="viewerPassword" placeholder="Leave blank to keep current" /></label>
-          <label>New admin password<input type="text" name="adminPassword" placeholder="Leave blank to keep current" /></label>
+          <label>New viewer password<input type="text" name="viewerPassword"
+              placeholder="Leave blank to keep current" /></label>
+          <label>New admin password<input type="text" name="adminPassword"
+              placeholder="Leave blank to keep current" /></label>
           <button class="btn" type="submit">Save Security</button>
         </form>
 
@@ -130,4 +141,5 @@
   <script src="/static/vendor/page-flip.browser.js"></script>
   <script src="/static/app.js" defer></script>
 </body>
+
 </html>
