@@ -2,6 +2,8 @@
 let currentManifest = null;
 let publicConfig = null;
 let adminAuthed = false;
+let isBookReady = false;
+
 
 async function api(url, options = {}) {
   const res = await fetch(url, options);
@@ -30,11 +32,11 @@ function setViewerMsg(msg, err = false) {
 
 function updatePageLabel(pageNumber) {
   const label = document.getElementById('pageLabel');
-  const $book = $('#flipbook');
-  if (!$book.turn('is')) {
+  if (!isBookReady) {
     label.textContent = 'Page 0 / 0';
     return;
   }
+  const $book = $('#flipbook');
   const current = pageNumber || $book.turn('page');
   const total = $book.turn('pages');
   label.textContent = `Page ${current} / ${total}`;
@@ -87,9 +89,7 @@ async function loadPublicConfig() {
 function resizeBook() {
   const wrap = document.getElementById('bookWrap');
   const book = document.getElementById('flipbook');
-  const $book = $(book);
-
-  if (!wrap || !$book.turn('is') || !currentManifest) return;
+  if (!wrap || !isBookReady || !currentManifest) return;
 
   const pWidth = currentManifest.pageWidth || 700;
   const pHeight = currentManifest.pageHeight || 1000;
@@ -126,11 +126,12 @@ function renderBook() {
   const status = document.getElementById('status');
   const wrap = document.getElementById('bookWrap');
   const $book = $('#flipbook');
-
+  
   if (!currentManifest?.pageUrls?.length) {
     status.textContent = 'No pages yet. Log in to admin panel to upload.';
     status.classList.remove('hidden');
     wrap.classList.add('hidden');
+    if (isBookReady) { $book.turn('destroy'); isBookReady = false; }
     updatePageLabel();
     return;
   }
@@ -142,8 +143,9 @@ function renderBook() {
   const pHeight = currentManifest.pageHeight || 1000;
   const isMobile = window.innerWidth < 768;
 
-  if ($book.turn('is')) {
+  if (isBookReady) {
     $book.turn('destroy');
+    isBookReady = false;
   }
   $book.html('');
   $book.css('transform', 'none');
@@ -171,6 +173,7 @@ function renderBook() {
     }
   });
 
+  isBookReady = true;
   updatePageLabel();
   resizeBook();
 
@@ -319,9 +322,9 @@ async function logoutAdmin() {
   closeAdmin();
 }
 
-function bindUi() {
-  document.getElementById('prevBtn').addEventListener('click', () => $('#flipbook').turn('is') && $('#flipbook').turn('previous'));
-  document.getElementById('nextBtn').addEventListener('click', () => $('#flipbook').turn('is') && $('#flipbook').turn('next'));
+  function bindUi() {
+  document.getElementById('prevBtn').addEventListener('click', () => isBookReady && $('#flipbook').turn('previous'));
+  document.getElementById('nextBtn').addEventListener('click', () => isBookReady && $('#flipbook').turn('next'));
   document.getElementById('fullscreenBtn').addEventListener('click', async () => {
     if (!document.fullscreenElement) await document.documentElement.requestFullscreen();
     else await document.exitFullscreen();
@@ -342,12 +345,13 @@ function bindUi() {
   document.getElementById('clearBtn').addEventListener('click', clearAlbum);
   document.getElementById('logoutAdminBtn').addEventListener('click', logoutAdmin);
 
-  window.addEventListener('keydown', (e) => {
+    window.addEventListener('keydown', (e) => {
     if (document.activeElement.tagName === 'INPUT') return;
-    if (e.key === 'ArrowLeft') $('#flipbook').turn('is') && $('#flipbook').turn('previous');
-    if (e.key === 'ArrowRight') $('#flipbook').turn('is') && $('#flipbook').turn('next');
+    if (e.key === 'ArrowLeft') { isBookReady && $('#flipbook').turn('previous'); }
+    if (e.key === 'ArrowRight') { isBookReady && $('#flipbook').turn('next'); }
   });
 }
+
 
 window.setDims = setDims;
 bindUi();
