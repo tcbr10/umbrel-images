@@ -14,9 +14,9 @@
       <p id="albumSubtitle" class="subtitle">Please log in to view</p>
     </div>
     <div class="top-actions">
-      <button class="btn secondary" id="prevBtn" aria-label="Previous page">&#8592;</button>
+      <button class="btn secondary" id="prevBtn" aria-label="Previous page">‹</button>
       <span id="pageLabel" class="page-label">Page 0 / 0</span>
-      <button class="btn secondary" id="nextBtn" aria-label="Next page">&#8594;</button>
+      <button class="btn secondary" id="nextBtn" aria-label="Next page">›</button>
       <button class="btn secondary" id="fullscreenBtn">Fullscreen</button>
     </div>
   </header>
@@ -56,20 +56,22 @@
             <button type="button" class="btn outline sm" onclick="setDims(500, 700)">A5 Portrait</button>
           </div>
 
-          <label class="check mt-2"><input type="checkbox" name="rtl" id="rtlToggle" /> Right-to-Left (Hebrew/Arabic)</label>
+          <label class="check mt-2"><input type="checkbox" name="showCover" checked /> Treat first page as front cover</label>
           <button class="btn" type="submit">Save Settings</button>
         </form>
 
         <form id="pdfForm" class="stack boxed-form">
           <h3>Upload PDF</h3>
           <label>PDF file<input type="file" name="file" accept="application/pdf" required /></label>
-          <button class="btn" type="submit">Upload PDF & Replace</button>
+          <label class="check"><input type="checkbox" name="replace" checked /> Clear existing pages</label>
+          <button class="btn" type="submit">Upload PDF</button>
         </form>
 
         <form id="imagesForm" class="stack boxed-form">
           <h3>Upload images</h3>
           <label>Images<input type="file" name="files" accept="image/png,image/jpeg,image/webp" multiple required /></label>
-          <button class="btn" type="submit">Upload Images & Replace</button>
+          <label class="check"><input type="checkbox" name="replace" checked /> Clear existing pages</label>
+          <button class="btn" type="submit">Upload Images</button>
         </form>
 
         <form id="securityForm" class="stack boxed-form mt-4">
@@ -118,9 +120,8 @@
     </form>
   </div>
 
-     <!-- Loaded from CDN -->
-  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/turn.js/3/turn.min.js"></script>
-  <script src="/static/app.js?v=3" defer></script>
+  <script src="/static/vendor/jquery.min.js"></script>
+  <script src="/static/vendor/turn.min.js"></script>
+  <script src="/static/app.js" defer></script>
 </body>
 </html>
