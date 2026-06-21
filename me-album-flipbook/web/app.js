@@ -1,4 +1,3 @@
-let flipbook = null;
 let currentManifest = null;
 let publicConfig = null;
 let adminAuthed = false;
@@ -32,16 +31,6 @@ function setViewerMsg(msg, err = false) {
   }
 }
 
-function updatePageLabel() {
-  const label = document.getElementById('pageLabel');
-  if (!flipbook || !label) {
-    if (label) label.textContent = 'Page 0 / 0';
-    return;
-  }
-  label.textContent = `Page ${flipbook.getCurrentPageIndex() + 1} / ${flipbook.getPageCount()}`;
-}
-
-// Admin Panel Toggle & Routing
 async function handleRoute() {
   const hash = window.location.hash;
   if (hash === '#admin') {
@@ -59,6 +48,7 @@ async function handleRoute() {
     document.getElementById('mainLayout').classList.remove('has-admin');
     document.getElementById('adminLoginOverlay').classList.add('hidden');
   }
+  scaleFlipbook();
 }
 
 function closeAdmin() {
@@ -115,9 +105,12 @@ async function loadManifest() {
 function renderBook() {
   const status = document.getElementById('status');
   const wrap = document.getElementById('bookWrap');
-  const container = document.getElementById('flipbook');
-  if (!container) return;
-  container.innerHTML = '';
+  const container = $('#flipbook');
+
+  if (container.turn('is')) {
+      container.turn('destroy');
+  }
+  container.empty();
 
   if (!currentManifest?.pageUrls?.length) {
     if (status) {
@@ -129,94 +122,99 @@ function renderBook() {
     return;
   }
 
-  // Dynamic dimensions based on admin config
   const pWidth = currentManifest.pageWidth || 700;
   const pHeight = currentManifest.pageHeight || 1000;
+  const isRtl = currentManifest.rtl === true;
 
-  // 1. קריאת הגדרת RTL מהאחסון המקומי
-  const isRtl = localStorage.getItem('isRtl') === 'true';
+  // Add pages for Turn.js
+  currentManifest.pageUrls.forEach(url => {
+      const div = $('<div />').css({
+          'background-image': `url(${url})`,
+          'background-size': '100% 100%',
+          'background-color': '#fff'
+      });
+      container.append(div);
+  });
 
-  // 2. הגדרת כיוון המכולה והכפתורים בהתאם
+  // Initialize Turn.js
+  container.turn({
+      width: pWidth * 2,
+      height: pHeight,
+      autoCenter: true,
+      display: 'double',
+      acceleration: true,
+      direction: isRtl ? 'rtl' : 'ltr',
+      gradients: true,
+      elevation: 50,
+      when: {
+          turning: function(event, page, view) {
+              updatePageLabel(page);
+          }
+      }
+  });
+
   if (isRtl) {
-    container.style.direction = 'rtl';
     document.getElementById('btnPrev').innerHTML = '&#8594;';
     document.getElementById('btnNext').innerHTML = '&#8592;';
   } else {
-    container.style.direction = 'ltr';
     document.getElementById('btnPrev').innerHTML = '&#8592;';
     document.getElementById('btnNext').innerHTML = '&#8594;';
   }
 
-  // 3. יצירת ה-flipbook
-  flipbook = new St.PageFlip(container, {
-    width: pWidth,
-    height: pHeight,
-    size: 'stretch',
-    minWidth: 280,
-    maxWidth: pWidth * 2,
-    minHeight: 400,
-    maxHeight: pHeight * 2,
-    showCover: currentManifest.showCover !== false,
-    drawShadow: true,
-    flippingTime: 900,
-    usePortrait: true,
-    maxShadowOpacity: 0.25,
-    mobileScrollSupport: false,
-    swipeDistance: 24,
-    clickEventForward: true,
-    useMouseEvents: true,
-    autoSize: true,
-  });
-
-  flipbook.on('init', updatePageLabel);
-  flipbook.on('flip', updatePageLabel);
-
-  let finalUrls = [...currentManifest.pageUrls];
-  if (isRtl && finalUrls.length > 0) {
-    finalUrls.reverse();
-  }
-
-  flipbook.loadFromImages(finalUrls);
-
-  // 5. קפיצה לעמוד האחרון (העטיפה הקדמית ב-RTL)
-  if (isRtl) {
-    setTimeout(() => {
-      if (flipbook) flipbook.turnToPage(flipbook.getPageCount() - 1);
-    }, 500);
-  }
-
-  if (status) status.classList.add('hidden');
-  if (wrap) wrap.classList.remove('hidden');
-  updatePageLabel();
-
-  // Populate admin forms with current values
   const meta = document.getElementById('metaForm');
   if (meta) {
     meta.title.value = currentManifest.title || '';
     meta.subtitle.value = currentManifest.subtitle || '';
     meta.pageWidth.value = pWidth;
     meta.pageHeight.value = pHeight;
-    meta.showCover.checked = currentManifest.showCover !== false;
+    const rtlToggle = document.getElementById('rtlToggle');
+    if (rtlToggle) rtlToggle.checked = isRtl;
   }
-  
+
   setText('albumTitle', currentManifest.title || 'Album Flipbook');
   setText('albumSubtitle', currentManifest.subtitle || '');
 
-  // הטיפול ב-Checkbox של הלקוח
-  const rtlToggle = document.getElementById('localRtlToggle');
-  if (rtlToggle) {
-    rtlToggle.checked = isRtl;
-    // מסירים מאזינים קודמים כדי שלא ייווצר כפל בעת רענון
-    const newToggle = rtlToggle.cloneNode(true);
-    rtlToggle.parentNode.replaceChild(newToggle, rtlToggle);
-    
-    newToggle.addEventListener('change', (e) => {
-      localStorage.setItem('isRtl', e.target.checked ? 'true' : 'false');
-      renderBook(); // רענון מיידי של הספר
-    });
-  }
+  if (status) status.classList.add('hidden');
+  if (wrap) wrap.classList.remove('hidden');
+
+  scaleFlipbook();
+  updatePageLabel(container.turn('page'));
 }
-// *** כאן הייתה חסרה סגירת הסוגריים המסולסלים של פונקציית renderBook בסקריפט שלך! ***
+
+function scaleFlipbook() {
+    const flipbook = $('#flipbook');
+    if (!flipbook.turn('is')) return;
+
+    const wrap = document.getElementById('bookWrap');
+    if (!wrap) return;
+
+    const pWidth = currentManifest.pageWidth || 700;
+    const pHeight = currentManifest.pageHeight || 1000;
+
+    const scaleW = wrap.clientWidth / (pWidth * 2);
+    const scaleH = wrap.clientHeight / pHeight;
+    let scale = Math.min(scaleW, scaleH) * 0.95;
+    if (scale > 1) scale = 1;
+
+    flipbook.css({
+        transform: `scale(${scale})`,
+        transformOrigin: 'center center'
+    });
+}
+window.addEventListener('resize', scaleFlipbook);
+
+function updatePageLabel(page) {
+    const label = document.getElementById('pageLabel');
+    if (!label) return;
+    const fb = $('#flipbook');
+    if (!fb.turn('is')) {
+        label.textContent = 'Page 0 / 0';
+        return;
+    }
+    const current = page || fb.turn('page');
+    const total = fb.turn('pages');
+    label.textContent = `Page ${current} / ${total}`;
+}
 
 async function refreshAll() {
   await loadPublicConfig();
@@ -265,8 +263,6 @@ async function handleAdminLogin(e) {
     adminAuthed = true;
     form.reset();
     document.getElementById('adminLoginMsg').textContent = '';
-
-    // Reroute to open panel
     handleRoute();
   } catch (err) {
     document.getElementById('adminLoginMsg').textContent = err.message;
@@ -309,9 +305,10 @@ async function handleMetaSave(e) {
       body: JSON.stringify({
         title: fd.get('title') || 'Album Flipbook',
         subtitle: fd.get('subtitle') || '',
-        showCover: fd.get('showCover') === 'on',
+        showCover: true,
         pageWidth: parseInt(fd.get('pageWidth')) || 700,
-        pageHeight: parseInt(fd.get('pageHeight')) || 1000
+        pageHeight: parseInt(fd.get('pageHeight')) || 1000,
+        rtl: fd.get('rtl') === 'on'
       }),
     });
     await refreshAll();
@@ -355,23 +352,24 @@ async function logoutAdmin() {
 }
 
 function bindUi() {
-  // Navigation & View
   const prevBtn = document.getElementById('prevBtn');
   const nextBtn = document.getElementById('nextBtn');
 
   if (prevBtn) {
     prevBtn.addEventListener('click', () => {
-      if (!flipbook) return;
-      const isRtl = localStorage.getItem('isRtl') === 'true';
-      isRtl ? flipbook.flipNext('top') : flipbook.flipPrev('top');
+      const fb = $('#flipbook');
+      if (!fb.turn('is')) return;
+      const isRtl = currentManifest && currentManifest.rtl === true;
+      isRtl ? fb.turn('next') : fb.turn('previous');
     });
   }
 
   if (nextBtn) {
     nextBtn.addEventListener('click', () => {
-      if (!flipbook) return;
-      const isRtl = localStorage.getItem('isRtl') === 'true';
-      isRtl ? flipbook.flipPrev('top') : flipbook.flipNext('top');
+      const fb = $('#flipbook');
+      if (!fb.turn('is')) return;
+      const isRtl = currentManifest && currentManifest.rtl === true;
+      isRtl ? fb.turn('previous') : fb.turn('next');
     });
   }
 
@@ -383,7 +381,6 @@ function bindUi() {
     });
   }
 
-  // Hash routing
   window.addEventListener('hashchange', handleRoute);
 
   const closeBtn = document.getElementById('closeAdminBtn');
@@ -392,7 +389,6 @@ function bindUi() {
   const cancelLoginBtn = document.getElementById('cancelAdminLoginBtn');
   if (cancelLoginBtn) cancelLoginBtn.addEventListener('click', closeAdmin);
 
-  // Forms
   const viewerForm = document.getElementById('viewerLoginForm');
   if (viewerForm) viewerForm.addEventListener('submit', handleViewerLogin);
 
@@ -417,23 +413,22 @@ function bindUi() {
   const logBtn = document.getElementById('logoutAdminBtn');
   if (logBtn) logBtn.addEventListener('click', logoutAdmin);
 
-  // Keyboard
   window.addEventListener('keydown', (e) => {
     if (document.activeElement.tagName === 'INPUT') return;
-    const isRtl = localStorage.getItem('isRtl') === 'true';
+    const fb = $('#flipbook');
+    if (!fb.turn('is')) return;
+    const isRtl = currentManifest && currentManifest.rtl === true;
 
     if (e.key === 'ArrowLeft') {
-      if (flipbook) isRtl ? flipbook.flipNext('top') : flipbook.flipPrev('top');
+      isRtl ? fb.turn('next') : fb.turn('previous');
     }
     if (e.key === 'ArrowRight') {
-      if (flipbook) isRtl ? flipbook.flipPrev('top') : flipbook.flipNext('top');
+      isRtl ? fb.turn('previous') : fb.turn('next');
     }
   });
 }
 
-// Global expose for preset buttons
 window.setDims = setDims;
-
 bindUi();
 handleRoute();
 refreshAll().catch((err) => console.error(err));

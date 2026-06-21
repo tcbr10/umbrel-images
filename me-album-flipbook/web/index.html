@@ -1,15 +1,12 @@
 <!doctype html>
 <html lang="en">
-
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Album Flipbook</title>
   <link rel="stylesheet" href="/static/styles.css" />
 </head>
-
 <body>
-  <!-- Header (Visible to clients) -->
   <header class="topbar">
     <div>
       <p class="eyebrow" id="headerEyebrow">Album Preview</p>
@@ -17,22 +14,14 @@
       <p id="albumSubtitle" class="subtitle">Please log in to view</p>
     </div>
     <div class="top-actions">
-      <button class="btn secondary" id="prevBtn" aria-label="Previous page">‹</button>
+      <button class="btn secondary" id="prevBtn" aria-label="Previous page">&#8592;</button>
       <span id="pageLabel" class="page-label">Page 0 / 0</span>
-      <button class="btn secondary" id="nextBtn" aria-label="Next page">›</button>
+      <button class="btn secondary" id="nextBtn" aria-label="Next page">&#8594;</button>
       <button class="btn secondary" id="fullscreenBtn">Fullscreen</button>
-      <label class="check mt-2">
-        <input type="checkbox" checked id="localRtlToggle" />
-        Right-to-Left (Hebrew/Arabic)
-      </label>
-
     </div>
   </header>
 
-  <!-- Main layout splits Viewer & Admin dynamically -->
   <main class="layout" id="mainLayout">
-
-    <!-- Viewer Card -->
     <section class="viewer-card">
       <div id="status" class="status">Loading album…</div>
       <div id="bookWrap" class="book-wrap hidden">
@@ -40,7 +29,6 @@
       </div>
     </section>
 
-    <!-- Admin Panel (Hidden from clients) -->
     <aside class="admin-card hidden" id="adminPanel">
       <div class="stack">
         <div class="admin-header">
@@ -51,49 +39,44 @@
           <button class="btn secondary sm" id="closeAdminBtn">✕ Close</button>
         </div>
 
-        <h3>Album details & Dimensions</h3>
-        <p class="muted text-sm">Adjust layout to fit A4, A5, Square, etc.</p>
-        <label>Title<input type="text" name="title" placeholder="Album title" /></label>
-        <label>Subtitle<input type="text" name="subtitle" placeholder="Short description" /></label>
+        <form id="metaForm" class="stack boxed-form">
+          <h3>Album details & Dimensions</h3>
+          <p class="muted text-sm">Adjust layout to fit A4, A5, Square, etc.</p>
+          <label>Title<input type="text" name="title" placeholder="Album title" /></label>
+          <label>Subtitle<input type="text" name="subtitle" placeholder="Short description" /></label>
 
-        <div class="row">
-          <label class="flex-1">Page Width (px) <input type="number" name="pageWidth" required /></label>
-          <label class="flex-1">Page Height (px) <input type="number" name="pageHeight" required /></label>
-        </div>
-        <div class="quick-sizes">
-          <button type="button" class="btn outline sm" onclick="setDims(700, 1000)">A4 Portrait</button>
-          <button type="button" class="btn outline sm" onclick="setDims(1000, 700)">A4 Landscape</button>
-          <button type="button" class="btn outline sm" onclick="setDims(800, 800)">Square</button>
-          <button type="button" class="btn outline sm" onclick="setDims(500, 700)">A5 Portrait</button>
-        </div>
+          <div class="row">
+            <label class="flex-1">Page Width (px) <input type="number" name="pageWidth" required /></label>
+            <label class="flex-1">Page Height (px) <input type="number" name="pageHeight" required /></label>
+          </div>
+          <div class="quick-sizes">
+            <button type="button" class="btn outline sm" onclick="setDims(700, 1000)">A4 Portrait</button>
+            <button type="button" class="btn outline sm" onclick="setDims(1000, 700)">A4 Landscape</button>
+            <button type="button" class="btn outline sm" onclick="setDims(800, 800)">Square</button>
+            <button type="button" class="btn outline sm" onclick="setDims(500, 700)">A5 Portrait</button>
+          </div>
 
-        <label class="check mt-2"><input type="checkbox" name="showCover" checked /> Treat first page as front
-          cover</label>
-        <button class="btn" type="submit">Save Settings</button>
+          <label class="check mt-2"><input type="checkbox" name="rtl" id="rtlToggle" /> Right-to-Left (Hebrew/Arabic)</label>
+          <button class="btn" type="submit">Save Settings</button>
         </form>
 
         <form id="pdfForm" class="stack boxed-form">
           <h3>Upload PDF</h3>
           <label>PDF file<input type="file" name="file" accept="application/pdf" required /></label>
-          <label class="check"><input type="checkbox" name="replace" checked /> Clear existing pages</label>
-          <button class="btn" type="submit">Upload PDF</button>
+          <button class="btn" type="submit">Upload PDF & Replace</button>
         </form>
 
         <form id="imagesForm" class="stack boxed-form">
           <h3>Upload images</h3>
-          <label>Images<input type="file" name="files" accept="image/png,image/jpeg,image/webp" multiple
-              required /></label>
-          <label class="check"><input type="checkbox" name="replace" checked /> Clear existing pages</label>
-          <button class="btn" type="submit">Upload Images</button>
+          <label>Images<input type="file" name="files" accept="image/png,image/jpeg,image/webp" multiple required /></label>
+          <button class="btn" type="submit">Upload Images & Replace</button>
         </form>
 
         <form id="securityForm" class="stack boxed-form mt-4">
           <h3>Security</h3>
           <label class="check"><input type="checkbox" name="viewerProtected" /> Require viewer password</label>
-          <label>New viewer password<input type="text" name="viewerPassword"
-              placeholder="Leave blank to keep current" /></label>
-          <label>New admin password<input type="text" name="adminPassword"
-              placeholder="Leave blank to keep current" /></label>
+          <label>New viewer password<input type="text" name="viewerPassword" placeholder="Leave blank to keep current" /></label>
+          <label>New admin password<input type="text" name="adminPassword" placeholder="Leave blank to keep current" /></label>
           <button class="btn" type="submit">Save Security</button>
         </form>
 
@@ -110,7 +93,6 @@
     <p>&copy; Album Flipbook</p>
   </footer>
 
-  <!-- Viewer Login Overlay -->
   <div class="overlay hidden" id="viewerLoginOverlay">
     <form class="modal" id="viewerLoginForm">
       <p class="eyebrow">Private Album</p>
@@ -122,7 +104,6 @@
     </form>
   </div>
 
-  <!-- Admin Login Overlay -->
   <div class="overlay hidden" id="adminLoginOverlay">
     <form class="modal" id="adminLoginForm">
       <p class="eyebrow">Admin access</p>
@@ -137,8 +118,9 @@
     </form>
   </div>
 
-  <script src="/static/vendor/page-flip.browser.js"></script>
+  <!-- Loaded from CDN -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/3/turn.min.js"></script>
   <script src="/static/app.js" defer></script>
 </body>
-
 </html>

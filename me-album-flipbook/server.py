@@ -32,7 +32,10 @@ app.mount('/static', StaticFiles(directory=str(WEB_DIR)), name='static')
 
 def read_json(path: Path, default):
     if path.exists():
-        return json.loads(path.read_text(encoding='utf-8'))
+        try:
+            return json.loads(path.read_text(encoding='utf-8'))
+        except:
+            pass
     return default
 
 def write_json(path: Path, data):
@@ -44,18 +47,13 @@ def hash_password(password: str) -> str:
 
 def load_manifest():
     data = read_json(MANIFEST_FILE, {})
-    
-    # תמיד נוודא שכל שדות החובה קיימים בקובץ
     if 'title' not in data: data['title'] = 'Album Preview'
     if 'subtitle' not in data: data['subtitle'] = 'Upload PDF or images to start'
     if 'showCover' not in data: data['showCover'] = True
     if 'pageWidth' not in data: data['pageWidth'] = 700
     if 'pageHeight' not in data: data['pageHeight'] = 1000
-    if 'pages' not in data: data['pages'] = []
-    
-    # זה התיקון הקריטי: אם אין rtl בקובץ הישן - נוסיף אותו!
     if 'rtl' not in data: data['rtl'] = False
-    
+    if 'pages' not in data: data['pages'] = []
     return data
 
 def save_manifest(data):
@@ -166,11 +164,10 @@ def ensure_demo():
         d.line((110, 92, 110, h - 92), fill='#d1c4b3', width=3)
         d.text((160, 150), 'Album Flipbook', fill=fg, font=big)
         d.text((160, 292), f'Sample page {i}', fill=fg, font=mid)
-        d.text((160, 362), 'Click Admin at the bottom to upload a PDF or images.', fill=fg, font=mid)
         name = f'{i:02d}.jpg'
         img.save(PAGES_DIR / name, quality=92)
         names.append(name)
-    save_manifest({'title': 'Album Preview', 'subtitle': 'Default admin password: umbrel', 'showCover': True, 'pageWidth': 700, 'pageHeight': 1000, 'pages': names})
+    save_manifest({'title': 'Album Preview', 'subtitle': 'Default admin password: umbrel', 'showCover': True, 'pageWidth': 700, 'pageHeight': 1000, 'rtl': False, 'pages': names})
 
 class LoginPayload(BaseModel):
     password: str
@@ -181,8 +178,7 @@ class MetaPayload(BaseModel):
     showCover: Optional[bool] = None
     pageWidth: Optional[int] = None
     pageHeight: Optional[int] = None
-    rtl: Optional[bool] = None     # <--- הוסף את השורה הזו
-
+    rtl: Optional[bool] = None
 
 class SecurityPayload(BaseModel):
     viewerProtected: bool = False
@@ -329,7 +325,7 @@ def api_meta(payload: MetaPayload, request: Request):
     if payload.showCover is not None: manifest['showCover'] = payload.showCover
     if payload.pageWidth is not None: manifest['pageWidth'] = payload.pageWidth
     if payload.pageHeight is not None: manifest['pageHeight'] = payload.pageHeight
-    if payload.rtl is not None: manifest['rtl'] = payload.rtl         # <--- הוסף את השורה הזו
+    if payload.rtl is not None: manifest['rtl'] = payload.rtl
     save_manifest(manifest)
     return {'ok': True, 'manifest': manifest}
 
