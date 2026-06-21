@@ -43,15 +43,20 @@ def hash_password(password: str) -> str:
     return hashlib.sha256(password.encode('utf-8')).hexdigest()
 
 def load_manifest():
-    return read_json(MANIFEST_FILE, {
-        'title': 'Album Preview',
-        'subtitle': 'Upload PDF or images to start',
-        'showCover': True,
-        'pageWidth': 700,
-        'pageHeight': 1000,
-        'pages': [],
-        'rtl': True          # <--- הוסף את השורה הזו
-    })
+    data = read_json(MANIFEST_FILE, {})
+    
+    # תמיד נוודא שכל שדות החובה קיימים בקובץ
+    if 'title' not in data: data['title'] = 'Album Preview'
+    if 'subtitle' not in data: data['subtitle'] = 'Upload PDF or images to start'
+    if 'showCover' not in data: data['showCover'] = True
+    if 'pageWidth' not in data: data['pageWidth'] = 700
+    if 'pageHeight' not in data: data['pageHeight'] = 1000
+    if 'pages' not in data: data['pages'] = []
+    
+    # זה התיקון הקריטי: אם אין rtl בקובץ הישן - נוסיף אותו!
+    if 'rtl' not in data: data['rtl'] = False
+    
+    return data
 
 def save_manifest(data):
     write_json(MANIFEST_FILE, data)
