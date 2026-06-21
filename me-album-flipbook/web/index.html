@@ -21,6 +21,11 @@
       <span id="pageLabel" class="page-label">Page 0 / 0</span>
       <button class="btn secondary" id="nextBtn" aria-label="Next page">›</button>
       <button class="btn secondary" id="fullscreenBtn">Fullscreen</button>
+      <label class="check mt-2">
+        <input type="checkbox" checked id="localRtlToggle" />
+        Right-to-Left (Hebrew/Arabic)
+      </label>
+
     </div>
   </header>
 
@@ -46,31 +51,25 @@
           <button class="btn secondary sm" id="closeAdminBtn">✕ Close</button>
         </div>
 
-        <form id="metaForm" class="stack boxed-form">
-          <label class="check mt-2">
-            <input type="checkbox" name="rtl" id="rtlToggle" />
-            Right-to-Left (Hebrew/Arabic)
-          </label>
+        <h3>Album details & Dimensions</h3>
+        <p class="muted text-sm">Adjust layout to fit A4, A5, Square, etc.</p>
+        <label>Title<input type="text" name="title" placeholder="Album title" /></label>
+        <label>Subtitle<input type="text" name="subtitle" placeholder="Short description" /></label>
 
-          <h3>Album details & Dimensions</h3>
-          <p class="muted text-sm">Adjust layout to fit A4, A5, Square, etc.</p>
-          <label>Title<input type="text" name="title" placeholder="Album title" /></label>
-          <label>Subtitle<input type="text" name="subtitle" placeholder="Short description" /></label>
+        <div class="row">
+          <label class="flex-1">Page Width (px) <input type="number" name="pageWidth" required /></label>
+          <label class="flex-1">Page Height (px) <input type="number" name="pageHeight" required /></label>
+        </div>
+        <div class="quick-sizes">
+          <button type="button" class="btn outline sm" onclick="setDims(700, 1000)">A4 Portrait</button>
+          <button type="button" class="btn outline sm" onclick="setDims(1000, 700)">A4 Landscape</button>
+          <button type="button" class="btn outline sm" onclick="setDims(800, 800)">Square</button>
+          <button type="button" class="btn outline sm" onclick="setDims(500, 700)">A5 Portrait</button>
+        </div>
 
-          <div class="row">
-            <label class="flex-1">Page Width (px) <input type="number" name="pageWidth" required /></label>
-            <label class="flex-1">Page Height (px) <input type="number" name="pageHeight" required /></label>
-          </div>
-          <div class="quick-sizes">
-            <button type="button" class="btn outline sm" onclick="setDims(700, 1000)">A4 Portrait</button>
-            <button type="button" class="btn outline sm" onclick="setDims(1000, 700)">A4 Landscape</button>
-            <button type="button" class="btn outline sm" onclick="setDims(800, 800)">Square</button>
-            <button type="button" class="btn outline sm" onclick="setDims(500, 700)">A5 Portrait</button>
-          </div>
-
-          <label class="check mt-2"><input type="checkbox" name="showCover" checked /> Treat first page as front
-            cover</label>
-          <button class="btn" type="submit">Save Settings</button>
+        <label class="check mt-2"><input type="checkbox" name="showCover" checked /> Treat first page as front
+          cover</label>
+        <button class="btn" type="submit">Save Settings</button>
         </form>
 
         <form id="pdfForm" class="stack boxed-form">
