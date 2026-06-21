@@ -1,3 +1,11 @@
+// הגנת CSS אוטומטית שמונעת מהספר "לפוצץ" את המסך ולדחוף את חלונית הניהול
+const layoutFix = document.createElement('style');
+layoutFix.innerHTML = `
+  .viewer-card { min-width: 0 !important; overflow: hidden !important; }
+  #bookWrap { width: 100%; height: 100%; position: relative; overflow: hidden; }
+`;
+document.head.appendChild(layoutFix);
+
 let currentManifest = null;
 let publicConfig = null;
 let adminAuthed = false;
@@ -99,11 +107,10 @@ function resizeBook() {
   let scale = Math.min(scaleW, scaleH) * 0.95;
   if (scale > 1) scale = 1;
 
-  // Use turn.js native resizing instead of CSS transforms
+  // מחשב גודל עדכני בהתאם לחלון הקיים
   const newWidth = Math.floor(originalTotalWidth * scale);
   const newHeight = Math.floor(pHeight * scale);
   
-  $book.css('transform', ''); // Clean any leftover transforms
   $book.turn('size', newWidth, newHeight);
 }
 
@@ -145,6 +152,16 @@ function renderBook() {
   const pHeight = currentManifest.pageHeight || 1000;
   const isMobile = window.innerWidth < 600;
   const viewMode = isMobile ? 'single' : 'double';
+  const originalTotalWidth = isMobile ? pWidth : (pWidth * 2);
+
+  // אנו מחשבים את המידות *לפני* יצירת הספר, כדי למנוע את דחיפת המסך ימינה
+  const scaleW = (wrap.clientWidth || window.innerWidth) / originalTotalWidth;
+  const scaleH = (wrap.clientHeight || window.innerHeight) / pHeight;
+  let scale = Math.min(scaleW, scaleH) * 0.95;
+  if (scale > 1) scale = 1;
+
+  const startWidth = Math.floor(originalTotalWidth * scale);
+  const startHeight = Math.floor(pHeight * scale);
 
   if (isBookReady) {
     $book.turn('destroy');
@@ -152,7 +169,6 @@ function renderBook() {
   }
   
   $book.html('');
-  $book.css('transform', ''); // Remove transform
 
   currentManifest.pageUrls.forEach((url, i) => {
     const cls = (i % 2 === 0) ? 'p-even' : 'p-odd';
@@ -165,8 +181,8 @@ function renderBook() {
   });
 
   $book.turn({
-    width: isMobile ? pWidth : (pWidth * 2),
-    height: pHeight,
+    width: startWidth,     // מפעיל את הספר כבר במידה המותאמת למסך
+    height: startHeight,
     display: viewMode,
     autoCenter: true,
     gradients: true,
@@ -181,9 +197,6 @@ function renderBook() {
   isBookReady = true;
   updatePageLabel();
   
-  // Instantly resize to fit the screen natively
-  resizeBook();
-
   const meta = document.getElementById('metaForm');
   meta.title.value = currentManifest.title || '';
   meta.subtitle.value = currentManifest.subtitle || '';

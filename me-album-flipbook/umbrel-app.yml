@@ -4,7 +4,7 @@ category: media
 name: Album Flipbook
 icon: icon.svg
 tagline: Fully responsive album viewer with dynamic sizes
-version: "1.4.9"
+version: "1.4.9.1"
 description: >-
   Self-hosted flipbook for Umbrel.
   Separates Admin panel from Client view cleanly.
