@@ -1,4 +1,4 @@
-// הגנת CSS אוטומטית למניעת פיצוץ המסך
+// הגנת CSS אוטומטית שמונעת מהספר "לפוצץ" את המסך ולדחוף את חלונית הניהול
 const layoutFix = document.createElement('style');
 layoutFix.innerHTML = `
   .viewer-card { min-width: 0 !important; overflow: hidden !important; }
@@ -107,6 +107,7 @@ function resizeBook() {
   let scale = Math.min(scaleW, scaleH) * 0.95;
   if (scale > 1) scale = 1;
 
+  // מחשב גודל עדכני בהתאם לחלון הקיים
   const newWidth = Math.floor(originalTotalWidth * scale);
   const newHeight = Math.floor(pHeight * scale);
   
@@ -153,6 +154,7 @@ function renderBook() {
   const viewMode = isMobile ? 'single' : 'double';
   const originalTotalWidth = isMobile ? pWidth : (pWidth * 2);
 
+  // אנו מחשבים את המידות *לפני* יצירת הספר, כדי למנוע את דחיפת המסך ימינה
   const scaleW = (wrap.clientWidth || window.innerWidth) / originalTotalWidth;
   const scaleH = (wrap.clientHeight || window.innerHeight) / pHeight;
   let scale = Math.min(scaleW, scaleH) * 0.95;
@@ -169,7 +171,6 @@ function renderBook() {
   $book.html('');
 
   currentManifest.pageUrls.forEach((url, i) => {
-    // עיצוב הדפים והגדרות הצל
     const cls = (i % 2 === 0) ? 'p-even' : 'p-odd';
     const div = $(`<div class="${cls}" />`).css({
       'background-image': `url(${url})`,
@@ -180,10 +181,9 @@ function renderBook() {
   });
 
   $book.turn({
-    width: startWidth,
+    width: startWidth,     // מפעיל את הספר כבר במידה המותאמת למסך
     height: startHeight,
     display: viewMode,
-    direction: 'rtl',   // <-- הגדרת האלבום מימין לשמאל
     autoCenter: true,
     gradients: true,
     elevation: 50,
@@ -197,8 +197,6 @@ function renderBook() {
   isBookReady = true;
   updatePageLabel();
   
-  resizeBook();
-
   const meta = document.getElementById('metaForm');
   meta.title.value = currentManifest.title || '';
   meta.subtitle.value = currentManifest.subtitle || '';
@@ -344,10 +342,8 @@ async function logoutAdmin() {
 }
 
 function bindUi() {
-  // ב-RTL הספר נפתח מימין לשמאל. 
-  // לכן, כפתור שמאל (<) יעביר לעמוד *הבא*, וכפתור ימין (>) יעביר לעמוד *הקודם*.
-  document.getElementById('prevBtn').addEventListener('click', () => isBookReady && $('#flipbook').turn('next'));
-  document.getElementById('nextBtn').addEventListener('click', () => isBookReady && $('#flipbook').turn('previous'));
+  document.getElementById('prevBtn').addEventListener('click', () => isBookReady && $('#flipbook').turn('previous'));
+  document.getElementById('nextBtn').addEventListener('click', () => isBookReady && $('#flipbook').turn('next'));
   
   document.getElementById('fullscreenBtn').addEventListener('click', async () => {
     if (!document.fullscreenElement) await document.documentElement.requestFullscreen();
@@ -371,10 +367,8 @@ function bindUi() {
   
   window.addEventListener('keydown', (e) => {
     if (document.activeElement.tagName === 'INPUT') return;
-    
-    // התאמת החצים במקלדת לקריאה מימין לשמאל
-    if (e.key === 'ArrowLeft') { isBookReady && $('#flipbook').turn('next'); }
-    if (e.key === 'ArrowRight') { isBookReady && $('#flipbook').turn('previous'); }
+    if (e.key === 'ArrowLeft') { isBookReady && $('#flipbook').turn('previous'); }
+    if (e.key === 'ArrowRight') { isBookReady && $('#flipbook').turn('next'); }
   });
 }
 
