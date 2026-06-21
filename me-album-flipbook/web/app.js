@@ -292,7 +292,6 @@ async function handleMetaSave(e) {
   const form = e.target;
   try {
     const fd = new FormData(form);
-    const isRtl = fd.get('rtl') === 'on';
     await api('/api/meta', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -302,7 +301,7 @@ async function handleMetaSave(e) {
         showCover: fd.get('showCover') === 'on',
         pageWidth: parseInt(fd.get('pageWidth')) || 700,
         pageHeight: parseInt(fd.get('pageHeight')) || 1000,
-        rtl: isRtl
+        rtl: fd.get('rtl') === 'on'  // <--- הוספנו את השורה הזו כדי שיישלח לשרת!
       }),
     });
     await refreshAll();

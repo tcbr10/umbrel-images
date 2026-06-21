@@ -50,7 +50,7 @@ def load_manifest():
         'pageWidth': 700,
         'pageHeight': 1000,
         'pages': [],
-        'rtl': False          # <--- הוסף את השורה הזו
+        'rtl': True          # <--- הוסף את השורה הזו
     })
 
 def save_manifest(data):
