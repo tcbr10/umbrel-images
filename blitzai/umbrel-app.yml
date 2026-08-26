@@ -1,14 +1,12 @@
 manifestVersion: 1
-id: me-album-flipbook
+id: me-blitzai
 category: media
-name: Album Flipbook
+name: BlitzAI
 icon: icon.svg
 tagline: Fully responsive album viewer with dynamic sizes
 version: "1.5.1"
 description: >-
-  Self-hosted flipbook for Umbrel.
-  Separates Admin panel from Client view cleanly.
-  Allows changing the album aspect ratio (A4, A5, Square) directly from the dashboard.
+  Self-hosted blitzai for Umbrel.
 releaseNotes: >-
   Fixed layout, added dimension settings, completely segregated admin UI.
 developer: Your Name
