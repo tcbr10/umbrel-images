@@ -1,0 +1,25 @@
+manifestVersion: 1
+id: me-album-flipbook
+category: media
+name: Album Flipbook
+icon: icon.svg
+tagline: Fully responsive album viewer with dynamic sizes
+version: "1.5.1"
+description: >-
+  Self-hosted flipbook for Umbrel.
+  Separates Admin panel from Client view cleanly.
+  Allows changing the album aspect ratio (A4, A5, Square) directly from the dashboard.
+releaseNotes: >-
+  Fixed layout, added dimension settings, completely segregated admin UI.
+developer: Your Name
+website: https://github.com/your-github-user/your-app-store
+repo: https://github.com/your-github-user/your-app-store
+support: https://github.com/your-github-user/your-app-store/issues
+port: 3017
+gallery:
+  - gallery/1.png
+path: ""
+defaultUsername: ""
+defaultPassword: ""
+submitter: Your Name
+submission: https://github.com/your-github-user/your-app-store
