@@ -3,28 +3,26 @@ version: "3.7"
 services:
   app_proxy:
     environment:
-      APP_HOST: blitzai_web_1
+      APP_HOST: me-blitzai_web_1
       APP_PORT: 3000
 
   web:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        NEXT_PUBLIC_API_URL: http://localhost:8000
-    image: blitzai:latest
+    # Replace <digest> with the output of:
+    #   docker buildx imagetools inspect tcbr10/blitzai:1.0.0-slim
+    image: tcbr10/blitzai:1.0.0-slim@sha256:d37942449b360bdf67372615a1035bcc8a9ef92a52100685ddcd944bfdcedeaa
     restart: on-failure
     stop_grace_period: 30s
     ports:
-      - "8000:8000"   # backend API (exposed so the browser-side frontend can reach it)
-      - "3000:3000"   # frontend UI (Umbrel's app_proxy targets this)
+      - "8500:8000"   # backend API — exposed so the browser-side frontend can reach it directly
+      - "5000:3000"   # frontend UI — Umbrel's app_proxy targets this
     volumes:
       - ${APP_DATA_DIR}/data:/data
     environment:
       HOST: "0.0.0.0"
-      BACKEND_PORT: "8000"
-      FRONTEND_PORT: "3000"
-      # Optional cloud engine keys — set via Umbrel's app settings if you use them
+      BACKEND_PORT: "8500"
+      FRONTEND_PORT: "5000"
+      # Optional cloud engine keys — set these via Umbrel's app settings UI
+      # (or leave blank and configure them from inside the app's Settings page)
       GROQ_API_KEY: "${GROQ_API_KEY:-}"
       GEMINI_API_KEY: "${GEMINI_API_KEY:-}"
       HUGGINGFACE_API_KEY: "${HUGGINGFACE_API_KEY:-}"

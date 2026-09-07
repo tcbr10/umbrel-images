@@ -1,23 +1,28 @@
 manifestVersion: 1
 id: me-blitzai
-category: media
+category: ai
 name: BlitzAI
-icon: icon.svg
-tagline: Fully responsive album viewer with dynamic sizes
-version: "1.5.1"
+version: "1.0.0"
+tagline: Hebrew-first transcription studio (Groq, Gemini, ivrit-ai)
 description: >-
-  Self-hosted blitzai for Umbrel.
+  Blitz AI is an open-source transcription tool with Hebrew-first support.
+  Transcribe local audio/video files or paste a YouTube/Vimeo link and get
+  full text. This build uses cloud transcription engines (Groq's ultra-fast
+  Whisper, Google Gemini, and ivrit-ai for best Hebrew accuracy) to keep the
+  image small — local on-device Whisper and speaker diarization are not
+  included in this packaging.
+developer: hoodini
+website: https://github.com/hoodini/blitzai
+dependencies: []
+repo: https://github.com/hoodini/blitzai
+support: https://github.com/hoodini/blitzai/issues
+port: 5000
+gallery: []
 releaseNotes: >-
-  Fixed layout, added dimension settings, completely segregated admin UI.
-developer: Your Name
-website: https://github.com/your-github-user/your-app-store
-repo: https://github.com/your-github-user/your-app-store
-support: https://github.com/your-github-user/your-app-store/issues
-port: 3017
-gallery:
-  - gallery/1.png
+  Slim cloud-engines-only build for umbrelOS (~1GB image, no bundled
+  faster-whisper/torch/pyannote GPU dependencies).
 path: ""
 defaultUsername: ""
 defaultPassword: ""
-submitter: Your Name
-submission: https://github.com/your-github-user/your-app-store
+submitter: me
+submission: https://github.com/hoodini/blitzai
