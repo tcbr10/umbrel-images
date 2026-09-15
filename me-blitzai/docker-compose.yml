@@ -9,7 +9,7 @@ services:
   web:
     # Replace <digest> with the output of:
     #   docker buildx imagetools inspect tcbr10/blitzai:1.0.0-slim
-    image: tcbr10/blitzai:1.0.0-slim@sha256:d37942449b360bdf67372615a1035bcc8a9ef92a52100685ddcd944bfdcedeaa
+    image: tcbr10/blitzai:1.0.0-slim@sha256:1ccbe40754deea9a4f921636a37d02f200ce0648dae08113404f1b0f212d34bc
     restart: on-failure
     stop_grace_period: 30s
     ports:
