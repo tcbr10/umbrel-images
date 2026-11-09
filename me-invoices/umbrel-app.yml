@@ -2,7 +2,7 @@ manifestVersion: 1
 id: me-invoices
 category: finance
 name: Invoices (Osek Za'ir)
-version: "0.2.0"
+version: "0.3.0"
 tagline: Quotes, receipts and expenses for Israeli small businesses
 icon: https://raw.githubusercontent.com/tcbr10/umbrel-images/master/me-invoices/icon.svg
 description: >-
@@ -19,11 +19,13 @@ description: >-
   outside your home network, put the app behind a tunnel (for example
   Cloudflare Tunnel) and set the public URL in Settings.
 releaseNotes: >-
-  Core business features: sign-up and multiple businesses, business settings
-  with logo and brand colour, clients, product catalog, price quotes,
-  receipts with payment details, receipt cancellations, branded Hebrew/English
-  PDFs (original and copy), expenses with receipt uploads, and a dashboard with
-  monthly profit and the turnover-ceiling meter.
+  Send documents by email (your own SMTP) and WhatsApp with open/view tracking,
+  online quote signing, a client portal, a visual layout builder for documents,
+  payment requests with recurring billing and automatic reminders, team
+  invitations with an accountant role, Excel/ZIP exports for the accountant,
+  bank statement reconciliation, and a tax set-aside estimator (2026 tables).
+  For client links to work from outside your network, set the public URL in
+  Settings (for example a Cloudflare Tunnel domain).
 developer: tcbr10
 website: https://github.com/tcbr10/invoices-system
 dependencies: []
