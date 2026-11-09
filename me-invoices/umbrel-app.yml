@@ -2,7 +2,7 @@ manifestVersion: 1
 id: me-invoices
 category: finance
 name: Invoices (Osek Za'ir)
-version: "0.4.0"
+version: "0.5.0"
 tagline: Quotes, receipts and expenses for Israeli small businesses
 icon: https://raw.githubusercontent.com/tcbr10/umbrel-images/master/me-invoices/icon.svg
 description: >-
@@ -19,12 +19,12 @@ description: >-
   outside your home network, put the app behind a tunnel (for example
   Cloudflare Tunnel) and set the public URL in Settings.
 releaseNotes: >-
-  Installable phone app: add it to your home screen (over your HTTPS tunnel
-  address), with a bottom tab bar and a quick "+" for receipts, quotes,
-  payment requests and expense photos. Optional AI assistant (Claude): describe
-  a quote in your own words and the form fills itself, or ask questions about
-  your income, clients and expenses. The assistant is off until you add your
-  own Claude API key in Settings.
+  REST API for creating documents from other systems (online shop, CRM,
+  Make/Zapier): per-business API keys, duplicate protection with
+  Idempotency-Key, PDFs, sending and cancelling. Bulk import of quotes,
+  payment requests or receipts from CSV or Excel with column mapping and a
+  preview. Documents can be dated in the past as long as no other document of
+  the same type was issued since. See API and Import in the menu.
 developer: tcbr10
 website: https://github.com/tcbr10/invoices-system
 dependencies: []

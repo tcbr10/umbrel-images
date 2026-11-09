@@ -18,7 +18,7 @@ services:
       PROXY_AUTH_ADD: "false"
 
   web:
-    image: ghcr.io/tcbr10/invoices-system:0.4.0@sha256:0468f75c6c4b8b03c30b640f2851538a6bfffa3e9fa85a3e2addaea600db976e
+    image: ghcr.io/tcbr10/invoices-system:sha-4cb28d2@sha256:71f383c654fd88050b3be87043a63216b0925849da3f6dc31eaaa4f01af85481
     user: "1000:1000"
     restart: on-failure
     stop_grace_period: 30s
@@ -37,7 +37,7 @@ services:
         condition: service_healthy
 
   worker:
-    image: ghcr.io/tcbr10/invoices-system:0.4.0@sha256:0468f75c6c4b8b03c30b640f2851538a6bfffa3e9fa85a3e2addaea600db976e
+    image: ghcr.io/tcbr10/invoices-system:sha-4cb28d2@sha256:71f383c654fd88050b3be87043a63216b0925849da3f6dc31eaaa4f01af85481
     user: "1000:1000"
     restart: on-failure
     stop_grace_period: 30s
