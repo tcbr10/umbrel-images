@@ -1,0 +1,35 @@
+manifestVersion: 1
+id: me-invoices
+category: finance
+name: Invoices (Osek Za'ir)
+version: "0.1.0"
+tagline: Quotes, receipts and expenses for Israeli small businesses
+icon: https://raw.githubusercontent.com/tcbr10/umbrel-images/master/me-invoices/icon.svg
+description: >-
+  Self-hosted management system for Israeli small businesses (Osek Za'ir / Osek Patur).
+
+
+  Issue branded price quotes and receipts that carry the details Israeli
+  bookkeeping rules require, log expenses, and follow income, expenses and
+  profit on a dashboard. Several users can each run their own separate
+  business account.
+
+
+  All data stays on your Umbrel. To let clients open quotes and receipts from
+  outside your home network, put the app behind a tunnel (for example
+  Cloudflare Tunnel) and set the public URL in the app settings.
+releaseNotes: >-
+  First packaged version: web app, background worker, PostgreSQL, PDF
+  rendering (Gotenberg) and nightly database backups.
+developer: tcbr10
+website: https://github.com/tcbr10/invoices-system
+dependencies: []
+repo: https://github.com/tcbr10/invoices-system
+support: https://github.com/tcbr10/invoices-system/issues
+port: 3870
+gallery: []
+path: ""
+defaultUsername: ""
+defaultPassword: ""
+submitter: tcbr10
+submission: https://github.com/tcbr10/invoices-system

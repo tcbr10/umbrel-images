@@ -1,0 +1,102 @@
+version: "3.7"
+
+# Umbrel packaging of the same image used everywhere else (see the root docker-compose.yml).
+# Umbrel provides: APP_DATA_DIR, APP_PASSWORD, APP_SEED, DEVICE_DOMAIN_NAME.
+# Containers are addressed by their full names (<app-id>_<service>_1) because Umbrel
+# also attaches apps to a shared network where short service names could collide.
+#
+# Pin every image to a digest before publishing, e.g.
+#   ghcr.io/tcbr10/invoices-system:0.1.0@sha256:...
+
+services:
+  app_proxy:
+    environment:
+      APP_HOST: me-invoices_web_1
+      APP_PORT: 3000
+      # The app has its own multi-user login, and client links (quote signing,
+      # client portal) must open without an Umbrel login.
+      PROXY_AUTH_ADD: "false"
+
+  web:
+    image: ghcr.io/tcbr10/invoices-system:0.1.0@sha256:81042b5774e512f63cde16556b9d3184b683fd7822cd0939cb465f945aeef629
+    user: "1000:1000"
+    restart: on-failure
+    stop_grace_period: 30s
+    volumes:
+      - ${APP_DATA_DIR}/data/app:/data
+    environment: &app-env
+      APP_ROLE: web
+      DATABASE_URL: postgres://invoices:${APP_PASSWORD}@me-invoices_postgres_1:5432/invoices
+      GOTENBERG_URL: http://me-invoices_gotenberg_1:3000
+      APP_URL: http://${DEVICE_DOMAIN_NAME}:3870
+      AUTH_SECRET: ${APP_SEED}
+      STORAGE_DRIVER: local
+      ENABLE_DIAGNOSTICS: "false"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  worker:
+    image: ghcr.io/tcbr10/invoices-system:0.1.0@sha256:81042b5774e512f63cde16556b9d3184b683fd7822cd0939cb465f945aeef629
+    user: "1000:1000"
+    restart: on-failure
+    stop_grace_period: 30s
+    volumes:
+      - ${APP_DATA_DIR}/data/app:/data
+    environment:
+      <<: *app-env
+      APP_ROLE: worker
+    depends_on:
+      web:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:17-alpine
+    restart: on-failure
+    stop_grace_period: 1m
+    environment:
+      POSTGRES_USER: invoices
+      POSTGRES_PASSWORD: ${APP_PASSWORD}
+      POSTGRES_DB: invoices
+      # Sub-directory, because the mounted folder is created by Umbrel and is not empty.
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - ${APP_DATA_DIR}/data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U invoices -d invoices"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  gotenberg:
+    image: gotenberg/gotenberg:8
+    restart: on-failure
+    command:
+      - gotenberg
+      - --api-timeout=60s
+      - --libreoffice-disable-routes=true
+
+  # Nightly pg_dump into ${APP_DATA_DIR}/data/backups (included in Umbrel backups of app data).
+  backup:
+    image: postgres:17-alpine
+    restart: on-failure
+    environment:
+      PGHOST: me-invoices_postgres_1
+      PGUSER: invoices
+      PGPASSWORD: ${APP_PASSWORD}
+      PGDATABASE: invoices
+      BACKUP_KEEP_DAYS: "30"
+    volumes:
+      - ${APP_DATA_DIR}/data/backups:/backups
+    depends_on:
+      postgres:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        while true; do
+          ts=$$(date +%Y%m%d-%H%M%S)
+          if pg_dump -Fc -f /backups/invoices-$$ts.dump; then echo "backup ok: invoices-$$ts.dump"; else echo "backup FAILED"; fi
+          find /backups -name 'invoices-*.dump' -mtime +$$BACKUP_KEEP_DAYS -delete
+          sleep 86400
+        done
