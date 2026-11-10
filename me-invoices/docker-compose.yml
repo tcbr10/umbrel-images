@@ -18,7 +18,7 @@ services:
       PROXY_AUTH_ADD: "false"
 
   web:
-    image: ghcr.io/tcbr10/invoices-system:0.6.0@sha256:ff6035f84bc4b10e982c35d7b1324f694a8d56b051519837b03cb17f6d27c71c
+    image: ghcr.io/tcbr10/invoices-system:0.7.0@sha256:46018643671992ca0bd2d20d1007deee70b837b623fc31c6da4e663854c5bd6e
     user: "1000:1000"
     restart: on-failure
     stop_grace_period: 30s
@@ -37,15 +37,17 @@ services:
         condition: service_healthy
 
   worker:
-    image: ghcr.io/tcbr10/invoices-system:0.6.0@sha256:ff6035f84bc4b10e982c35d7b1324f694a8d56b051519837b03cb17f6d27c71c
+    image: ghcr.io/tcbr10/invoices-system:0.7.0@sha256:46018643671992ca0bd2d20d1007deee70b837b623fc31c6da4e663854c5bd6e
     user: "1000:1000"
     restart: on-failure
     stop_grace_period: 30s
     volumes:
       - ${APP_DATA_DIR}/data/app:/data
+      - ${APP_DATA_DIR}/data/backups:/backups:ro # for the daily backup check
     environment:
       <<: *app-env
       APP_ROLE: worker
+      BACKUP_DIR: /backups
     depends_on:
       web:
         condition: service_healthy
@@ -96,7 +98,12 @@ services:
       - |
         while true; do
           ts=$$(date +%Y%m%d-%H%M%S)
-          if pg_dump -Fc -f /backups/invoices-$$ts.dump; then echo "backup ok: invoices-$$ts.dump"; else echo "backup FAILED"; fi
+          # Written under a temporary name first, so a failed dump never looks like a backup.
+          if pg_dump -Fc -f /backups/.invoices-$$ts.tmp && mv /backups/.invoices-$$ts.tmp /backups/invoices-$$ts.dump; then
+            echo "backup ok: invoices-$$ts.dump"
+          else
+            rm -f /backups/.invoices-$$ts.tmp; echo "backup FAILED"
+          fi
           find /backups -name 'invoices-*.dump' -mtime +$$BACKUP_KEEP_DAYS -delete
           sleep 86400
         done

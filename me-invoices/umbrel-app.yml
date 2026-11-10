@@ -2,7 +2,7 @@ manifestVersion: 1
 id: me-invoices
 category: finance
 name: Invoices (Osek Za'ir)
-version: "0.6.0"
+version: "0.7.0"
 tagline: Quotes, receipts and expenses for Israeli small businesses
 icon: https://raw.githubusercontent.com/tcbr10/umbrel-images/master/me-invoices/icon.svg
 description: >-
@@ -19,10 +19,11 @@ description: >-
   outside your home network, put the app behind a tunnel (for example
   Cloudflare Tunnel) and set the public URL in Settings.
 releaseNotes: >-
-  Automatic sending: payment requests and receipts (and receipt cancellations)
-  can be emailed to the client with the PDF as soon as they are issued. Turn it
-  on per document type in Settings, and set individual clients to always or
-  never. Also applies to documents issued through the API.
+  Server monitoring with Healthchecks.io: paste your ping key in Settings →
+  ניטור השרת (shown to the server admin) and get alerts when the server, its
+  internet connection, the PDF service, storage, recurring billing, reminders
+  or the nightly backup stop working. Also /api/health?deep=1 for UptimeRobot.
+  Backups are now written atomically.
 developer: tcbr10
 website: https://github.com/tcbr10/invoices-system
 dependencies: []
