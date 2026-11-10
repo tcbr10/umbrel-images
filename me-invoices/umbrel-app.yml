@@ -2,7 +2,7 @@ manifestVersion: 1
 id: me-invoices
 category: finance
 name: Invoices (Osek Za'ir)
-version: "0.7.0"
+version: "0.7.1"
 tagline: Quotes, receipts and expenses for Israeli small businesses
 icon: https://raw.githubusercontent.com/tcbr10/umbrel-images/master/me-invoices/icon.svg
 description: >-
@@ -19,11 +19,12 @@ description: >-
   outside your home network, put the app behind a tunnel (for example
   Cloudflare Tunnel) and set the public URL in Settings.
 releaseNotes: >-
-  Server monitoring with Healthchecks.io: paste your ping key in Settings →
-  ניטור השרת (shown to the server admin) and get alerts when the server, its
-  internet connection, the PDF service, storage, recurring billing, reminders
-  or the nightly backup stop working. Also /api/health?deep=1 for UptimeRobot.
-  Backups are now written atomically.
+  Bug-fix release. Duplicating a receipt works again; a payment request whose
+  receipt was cancelled is unpaid again (lists, dashboard, portal, reminders);
+  recurring billing can no longer issue the same period twice and keeps its
+  day of month; spreadsheet import keeps exact amounts; API "send" problems
+  no longer leave an issued document behind an error. Faster client, bank and
+  export pages, and paging in long lists.
 developer: tcbr10
 website: https://github.com/tcbr10/invoices-system
 dependencies: []
